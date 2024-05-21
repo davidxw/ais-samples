@@ -10,6 +10,12 @@ param logicAppName string
 @description('The name of the Service Bus namespace')
 param serviceBusNamespaceName string
 
+@description('The name of the Log Analytics workspace')
+param logAnalyticsWorkspaceName string
+
+@description('The name of the Application Insights instance')
+param applicationInsightsName string
+
 @description('The email address of the owner of the service')
 @minLength(1)
 param publisherEmail string = 'test@test.com'
@@ -26,6 +32,7 @@ var blobStorageAccountTokenName = toLower('${blobStorageAccountName}${resourceTo
 var logicAppPlanTokenName = toLower('${logicAppName}-plan-${resourceToken}')
 var logicAppTokenName = toLower('${logicAppName}-${resourceToken}')
 var serviceBusNamespaceTokenName = toLower('${serviceBusNamespaceName}-${resourceToken}')
+var logAnalyticsWorkspaceTokenName = toLower('${logAnalyticsWorkspaceName}-${resourceToken}')
 
 var listQueues = ['s1-received','s1-sub1-output']
 var s1topicName = 's1-processed'
@@ -134,6 +141,7 @@ resource logicApp 'Microsoft.Web/sites@2022-09-01' = {
       AzureFunctionsJobHost__extensionBundle__version: '${'[1.*,'}${' 2.0.0)'}'
       APP_KIND: 'workflowApp'
       serviceBus_fullyQualifiedNamespace: '${serviceBusNamespace.name}.servicebus.windows.net'
+      APPLICATIONINSIGHTS_CONNECTION_STRING: applicationInsights.properties.ConnectionString
     }
   }
 }
@@ -188,3 +196,21 @@ resource serviceBusRbac 'Microsoft.Authorization/roleAssignments@2022-04-01' = [
     principalId: logicApp.identity.principalId
   }
 }]
+
+// logging and monitoring
+resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2021-12-01-preview' = {
+  name: logAnalyticsWorkspaceTokenName
+  location: location
+}
+
+resource applicationInsights 'Microsoft.Insights/components@2020-02-02' = {
+  name: applicationInsightsName
+  location: location
+  kind: 'web'
+  properties: {
+    Application_Type: 'web'
+    Flow_Type: 'Redfield'
+    IngestionMode: 'LogAnalytics'
+    WorkspaceResourceId: logAnalyticsWorkspace.id
+  }
+}

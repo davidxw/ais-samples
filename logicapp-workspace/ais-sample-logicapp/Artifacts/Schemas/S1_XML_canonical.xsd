@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Created with Liquid Technologies Online Tools 1.0 (https://www.liquid-technologies.com) -->
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="GT_OutboundOrders">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="WarehouseID" type="xs:string" />
+        <xs:element name="ShipToCustomer">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="ClientID" type="xs:string" />
+              <xs:element name="ExternalAddressID" type="xs:unsignedInt" />
+              <xs:element name="AddressName" type="xs:string" />
+              <xs:element name="AddressLine1" type="xs:string" />
+              <xs:element name="AddressCity" type="xs:string" />
+              <xs:element name="AddressStateCode" type="xs:string" />
+              <xs:element name="AddressPostalCode" type="xs:unsignedShort" />
+              <xs:element name="AddressCountryName" type="xs:string" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="OrderSegment">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="ClientID" type="xs:string" />
+              <xs:element name="OrderNumber" type="xs:string" />
+              <xs:element name="EnteredDate" type="xs:unsignedLong" />
+              <xs:element name="ShiptoCustomer" type="xs:string" />
+              <xs:element name="ShipToAddress" type="xs:unsignedInt" />
+              <xs:element maxOccurs="unbounded" name="OrderLineSegment">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="OrderNumber" type="xs:string" />
+                    <xs:element name="OrderLineNumber" type="xs:unsignedShort" />
+                    <xs:element name="OrderSubLine" type="xs:unsignedByte" />
+                    <xs:element name="ItemNumber" type="xs:unsignedInt" />
+                    <xs:element name="OrderedQuantity" type="xs:decimal" />
+                    <xs:element name="EarlyShipDate" type="xs:unsignedLong" />
+                    <xs:element name="InventoryStatusProgression" type="xs:string" />
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

@@ -1,0 +1,638 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "ProcessShipment": {
+      "type": "object",
+      "properties": {
+        "@languageCode": {
+          "type": "string"
+        },
+        "@releaseID": {
+          "type": "string"
+        },
+        "@systemEnvironmentCode": {
+          "type": "string"
+        },
+        "@versionID": {
+          "type": "string"
+        },
+        "ApplicationArea": {
+          "type": "object",
+          "properties": {
+            "Sender": {
+              "type": "object",
+              "properties": {
+                "LogicalID": {
+                  "type": "object",
+                  "properties": {
+                    "@schemeAgencyID": {
+                      "type": "string"
+                    },
+                    "$": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "@schemeAgencyID",
+                    "$"
+                  ]
+                },
+                "ReferenceID": {
+                  "type": "object",
+                  "properties": {
+                    "@schemeAgencyID": {
+                      "type": "string"
+                    },
+                    "$": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "@schemeAgencyID",
+                    "$"
+                  ]
+                },
+                "ConfirmationCodes": {
+                  "type": "object",
+                  "properties": {
+                    "ConfirmationCode": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "ConfirmationCode"
+                  ]
+                }
+              },
+              "required": [
+                "LogicalID",
+                "ReferenceID",
+                "ConfirmationCodes"
+              ]
+            },
+            "Receiver": {
+              "type": "array",
+              "items": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "LogicalID": {
+                      "type": "object",
+                      "properties": {
+                        "@schemeAgencyID": {
+                          "type": "string"
+                        },
+                        "$": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "@schemeAgencyID",
+                        "$"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "LogicalID"
+                  ]
+                }
+              ]
+            },
+            "CreationDateTime": {
+              "type": "string"
+            },
+            "ScenarioID": {
+              "type": "object",
+              "properties": {
+                "@schemeID": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "@schemeID"
+              ]
+            }
+          },
+          "required": [
+            "Sender",
+            "Receiver",
+            "CreationDateTime",
+            "ScenarioID"
+          ]
+        },
+        "DataArea": {
+          "type": "object",
+          "properties": {
+            "Shipment": {
+              "type": "array",
+              "items": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "@typeCode": {
+                      "type": "string"
+                    },
+                    "ShipmentHeader": {
+                      "type": "object",
+                      "properties": {
+                        "DocumentReference": {
+                          "type": "array",
+                          "items": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "@typeCode": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "@typeCode"
+                              ]
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "ID": {
+                                  "type": "array",
+                                  "items": [
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "@typeCode": {
+                                          "type": "string"
+                                        },
+                                        "$": {
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "@typeCode",
+                                        "$"
+                                      ]
+                                    }
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "ID"
+                              ]
+                            }
+                          ]
+                        },
+                        "DeliveryReference": {
+                          "type": "array",
+                          "items": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "ID": {
+                                  "type": "array",
+                                  "items": [
+                                    {
+                                      "type": "string"
+                                    }
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "ID"
+                              ]
+                            }
+                          ]
+                        },
+                        "ShipmentReleaseDateTime": {
+                          "type": "string"
+                        },
+                        "ActualShipDateTime": {
+                          "type": "string"
+                        },
+                        "ScheduledDeliveryDateTime": {
+                          "type": "string"
+                        },
+                        "SupplierParty": {
+                          "type": "object",
+                          "properties": {
+                            "ID": {
+                              "type": "array",
+                              "items": [
+                                {
+                                  "type": "string"
+                                }
+                              ]
+                            },
+                            "Name": {
+                              "type": "array",
+                              "items": [
+                                {
+                                  "type": "string"
+                                }
+                              ]
+                            }
+                          },
+                          "required": [
+                            "ID",
+                            "Name"
+                          ]
+                        },
+                        "ShipToParty": {
+                          "type": "array",
+                          "items": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "ID": {
+                                  "type": "array",
+                                  "items": [
+                                    {
+                                      "type": "string"
+                                    }
+                                  ]
+                                },
+                                "Location": {
+                                  "type": "array",
+                                  "items": [
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "Address": {
+                                          "type": "array",
+                                          "items": [
+                                            {
+                                              "type": "object",
+                                              "properties": {
+                                                "Name": {
+                                                  "type": "array",
+                                                  "items": [
+                                                    {
+                                                      "type": "string"
+                                                    }
+                                                  ]
+                                                },
+                                                "StreetName": {
+                                                  "type": "string"
+                                                },
+                                                "CityName": {
+                                                  "type": "string"
+                                                },
+                                                "CountrySubDivisionCode": {
+                                                  "type": "array",
+                                                  "items": [
+                                                    {
+                                                      "type": "string"
+                                                    }
+                                                  ]
+                                                },
+                                                "CountryCode": {
+                                                  "type": "string"
+                                                },
+                                                "PostalCode": {
+                                                  "type": "string"
+                                                }
+                                              },
+                                              "required": [
+                                                "Name",
+                                                "StreetName",
+                                                "CityName",
+                                                "CountrySubDivisionCode",
+                                                "CountryCode",
+                                                "PostalCode"
+                                              ]
+                                            }
+                                          ]
+                                        },
+                                        "Contact": {
+                                          "type": "object",
+                                          "properties": {
+                                            "TelephoneCommunication": {
+                                              "type": "string"
+                                            },
+                                            "EMailAddressCommunication": {
+                                              "type": "string"
+                                            }
+                                          },
+                                          "required": [
+                                            "TelephoneCommunication",
+                                            "EMailAddressCommunication"
+                                          ]
+                                        },
+                                        "GLNID": {
+                                          "type": "integer"
+                                        }
+                                      },
+                                      "required": [
+                                        "Address",
+                                        "Contact",
+                                        "GLNID"
+                                      ]
+                                    }
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "ID",
+                                "Location"
+                              ]
+                            }
+                          ]
+                        },
+                        "LoadingDateTime": {
+                          "type": "string"
+                        },
+                        "PriorityCode": {
+                          "type": "string"
+                        },
+                        "Event": {
+                          "type": "array",
+                          "items": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "@typeCode": {
+                                  "type": "string"
+                                },
+                                "StartDateTime": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "@typeCode",
+                                "StartDateTime"
+                              ]
+                            }
+                          ]
+                        },
+                        "Extension": {
+                          "type": "array",
+                          "items": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "Code": {
+                                  "type": "array",
+                                  "items": [
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "@typeCode": {
+                                          "type": "string"
+                                        },
+                                        "$": {
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "@typeCode",
+                                        "$"
+                                      ]
+                                    }
+                                  ]
+                                },
+                                "ID": {
+                                  "type": "array",
+                                  "items": [
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "@typeCode": {
+                                          "type": "string"
+                                        },
+                                        "$": {
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "@typeCode",
+                                        "$"
+                                      ]
+                                    }
+                                  ]
+                                },
+                                "Name": {
+                                  "type": "array",
+                                  "items": [
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "@typeCode": {
+                                          "type": "string"
+                                        },
+                                        "$": {
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "@typeCode",
+                                        "$"
+                                      ]
+                                    }
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "Code",
+                                "ID",
+                                "Name"
+                              ]
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "DocumentReference",
+                        "DeliveryReference",
+                        "ShipmentReleaseDateTime",
+                        "ActualShipDateTime",
+                        "ScheduledDeliveryDateTime",
+                        "SupplierParty",
+                        "ShipToParty",
+                        "LoadingDateTime",
+                        "PriorityCode",
+                        "Event",
+                        "Extension"
+                      ]
+                    },
+                    "ShipmentItem": {
+                      "type": "array",
+                      "items": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "Item": {
+                              "type": "object",
+                              "properties": {
+                                "ID": {
+                                  "type": "array",
+                                  "items": [
+                                    {
+                                      "type": "string"
+                                    }
+                                  ]
+                                },
+                                "Packaging": {
+                                  "type": "array",
+                                  "items": [
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "@typeCode": {
+                                          "type": "string"
+                                        },
+                                        "PerPackageQuantity": {
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "@typeCode",
+                                        "PerPackageQuantity"
+                                      ]
+                                    }
+                                  ]
+                                },
+                                "Extension": {
+                                  "type": "array",
+                                  "items": [
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "Number": {
+                                          "type": "array",
+                                          "items": [
+                                            {
+                                              "type": "object",
+                                              "properties": {
+                                                "@typeCode": {
+                                                  "type": "string"
+                                                },
+                                                "$": {
+                                                  "type": "string"
+                                                }
+                                              },
+                                              "required": [
+                                                "@typeCode",
+                                                "$"
+                                              ]
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "required": [
+                                        "Number"
+                                      ]
+                                    }
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "ID",
+                                "Packaging",
+                                "Extension"
+                              ]
+                            },
+                            "Quantity": {
+                              "type": "array",
+                              "items": [
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "@typeCode": {
+                                      "type": "string"
+                                    },
+                                    "$": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "@typeCode",
+                                    "$"
+                                  ]
+                                }
+                              ]
+                            },
+                            "ShippedQuantity": {
+                              "type": "object",
+                              "properties": {
+                                "@typeCode": {
+                                  "type": "string"
+                                },
+                                "$": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "@typeCode",
+                                "$"
+                              ]
+                            },
+                            "Extension": {
+                              "type": "array",
+                              "items": [
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "Code": {
+                                      "type": "array",
+                                      "items": [
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "@typeCode": {
+                                              "type": "string"
+                                            },
+                                            "$": {
+                                              "type": "string"
+                                            }
+                                          },
+                                          "required": [
+                                            "@typeCode",
+                                            "$"
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "required": [
+                                    "Code"
+                                  ]
+                                }
+                              ]
+                            }
+                          },
+                          "required": [
+                            "Item",
+                            "Quantity",
+                            "ShippedQuantity",
+                            "Extension"
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "@typeCode",
+                    "ShipmentHeader",
+                    "ShipmentItem"
+                  ]
+                }
+              ]
+            }
+          },
+          "required": [
+            "Shipment"
+          ]
+        }
+      },
+      "required": [
+        "@languageCode",
+        "@releaseID",
+        "@systemEnvironmentCode",
+        "@versionID",
+        "ApplicationArea",
+        "DataArea"
+      ]
+    }
+  },
+  "required": [
+    "ProcessShipment"
+  ]
+}
