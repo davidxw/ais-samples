@@ -1,10 +1,45 @@
 {
-  "definition": {
-    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
-    "actions": {},
-    "contentVersion": "1.0.0.0",
-    "outputs": {},
-    "triggers": {}
-  },
-  "kind": "Stateful"
+    "definition": {
+        "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+        "actions": {
+            "Send_message": {
+                "type": "ServiceProvider",
+                "inputs": {
+                    "parameters": {
+                        "entityName": "s1-processed",
+                        "message": {
+                            "contentData": "@triggerBody()?['contentData']",
+                            "contentType": "@triggerBody()?['contentType']"
+                        }
+                    },
+                    "serviceProviderConfiguration": {
+                        "connectionName": "serviceBus",
+                        "operationId": "sendMessage",
+                        "serviceProviderId": "/serviceProviders/serviceBus"
+                    }
+                },
+                "runAfter": {}
+            }
+        },
+        "contentVersion": "1.0.0.0",
+        "outputs": {},
+        "triggers": {
+            "When_messages_are_available_in_a_queue": {
+                "type": "ServiceProvider",
+                "inputs": {
+                    "parameters": {
+                        "queueName": "s1-received",
+                        "isSessionsEnabled": false
+                    },
+                    "serviceProviderConfiguration": {
+                        "connectionName": "serviceBus",
+                        "operationId": "receiveQueueMessages",
+                        "serviceProviderId": "/serviceProviders/serviceBus"
+                    }
+                },
+                "splitOn": "@triggerOutputs()?['body']"
+            }
+        }
+    },
+    "kind": "Stateful"
 }

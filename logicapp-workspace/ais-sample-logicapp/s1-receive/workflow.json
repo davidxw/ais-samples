@@ -6,7 +6,7 @@
             "type": "ServiceProvider",
             "inputs": {
               "parameters": {
-                "entityName": "s1-processed",
+                "entityName": "s1-received",
                 "message": {
                   "contentData": "@triggerBody()"
                 }

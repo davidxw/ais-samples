@@ -1,0 +1,27 @@
+{
+  "definition": {
+    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+    "actions": {},
+    "contentVersion": "1.0.0.0",
+    "outputs": {},
+    "triggers": {
+      "When_messages_are_available_in_a_topic": {
+        "type": "ServiceProvider",
+        "inputs": {
+          "parameters": {
+            "topicName": "s1-processed",
+            "subscriptionName": "s1-sub3",
+            "isSessionsEnabled": false
+          },
+          "serviceProviderConfiguration": {
+            "connectionName": "serviceBus",
+            "operationId": "receiveTopicMessages",
+            "serviceProviderId": "/serviceProviders/serviceBus"
+          }
+        },
+        "splitOn": "@triggerOutputs()?['body']"
+      }
+    }
+  },
+  "kind": "Stateful"
+}

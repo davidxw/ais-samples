@@ -27,9 +27,10 @@ var logicAppPlanTokenName = toLower('${logicAppName}-plan-${resourceToken}')
 var logicAppTokenName = toLower('${logicAppName}-${resourceToken}')
 var serviceBusNamespaceTokenName = toLower('${serviceBusNamespaceName}-${resourceToken}')
 
-var listQueues = ['s1-processed','s1-sub1']
-var listTopics = ['s1-transformed']
+var listQueues = ['s1-received','s1-sub1-output']
+var s1topicName = 's1-processed'
 var listBlobContainers = ['s1-sub1','s3-final']
+var listSubscriptionNames = ['s1-sub1','s1-sub2', 's1-sub3']
 
 //
 // API Management
@@ -157,11 +158,18 @@ resource serviceBusQueues 'Microsoft.ServiceBus/namespaces/queues@2022-01-01-pre
   }
 }]
 
-resource serviceBusTopics 'Microsoft.ServiceBus/namespaces/topics@2022-01-01-preview' = [for name in listTopics:{
-  name: name
+resource serviceBusTopic 'Microsoft.ServiceBus/namespaces/topics@2022-01-01-preview' = {
+  name: s1topicName
   parent: serviceBusNamespace
   properties: {
 
+  }
+}
+
+resource serviceBusTopicSubscriptions 'Microsoft.ServiceBus/namespaces/topics/subscriptions@2022-01-01-preview' = [for name in listSubscriptionNames: {
+  name: name
+  parent: serviceBusTopic
+  properties: {
   }
 }]
 
