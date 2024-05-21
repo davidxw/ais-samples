@@ -4,5 +4,14 @@
       "name": "ais-sample-logicapp",
       "path": "./ais-sample-logicapp"
     }
-  ]
+  ],
+  "settings": {
+    "terminal.integrated.env.windows": {
+      "PATH": "C:\\Users\\dwatson\\.azurelogicapps\\dependencies\\DotNetSDK;${env:PATH}"
+    },
+    "omnisharp.dotNetCliPaths": [
+      "C:\\Users\\dwatson\\.azurelogicapps\\dependencies\\DotNetSDK"
+    ],
+    "debug.internalConsoleOptions": "neverOpen"
+  }
 }

@@ -132,6 +132,7 @@ resource logicApp 'Microsoft.Web/sites@2022-09-01' = {
       AzureFunctionsJobHost__extensionBundle__id: 'Microsoft.Azure.Functions.ExtensionBundle.Workflows'
       AzureFunctionsJobHost__extensionBundle__version: '${'[1.*,'}${' 2.0.0)'}'
       APP_KIND: 'workflowApp'
+      serviceBus_fullyQualifiedNamespace: '${serviceBusNamespace.name}.servicebus.windows.net'
     }
   }
 }
