@@ -21,6 +21,19 @@
         "id": "/serviceProviders/AzureCosmosDB"
       },
       "displayName": "cosmosDb"
+    },
+    "AzureBlob": {
+      "parameterValues": {
+        "blobStorageEndpoint": "@appsetting('AzureBlob_blobStorageEndpoint')",
+        "authProvider": {
+          "Type": "ManagedServiceIdentity"
+        }
+      },
+      "parameterSetName": "ManagedServiceIdentity",
+      "serviceProvider": {
+        "id": "/serviceProviders/AzureBlob"
+      },
+      "displayName": "blobStorage"
     }
   },
   "managedApiConnections": {}

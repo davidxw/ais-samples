@@ -40,7 +40,7 @@ var cosmosDBAccountTokenName = toLower('${cosmosDBAccountName}-${resourceToken}'
 
 var listQueues = ['s1-received','s1-sub1-output']
 var s1topicName = 's1-processed'
-var listBlobContainers = ['s1-sub1','s3-final']
+var listBlobContainers = ['s1-sub1-final','s3-final']
 var listSubscriptionNames = ['s1-sub1','s1-sub2', 's1-sub3']
 
 var cosmosDatabaseName = 'ais-samples-db'
@@ -75,7 +75,6 @@ resource blobStorageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
   properties: {
     supportsHttpsTrafficOnly: true
     minimumTlsVersion: 'TLS1_2'
-    defaultToOAuthAuthentication: true
   }
 }
 
@@ -97,7 +96,7 @@ var storageBlobRoleIds = [
   'ba92f5b4-2d11-453d-a403-e96b0029c9fe' // blob data contributor
 ]
 resource storageAccountRbac 'Microsoft.Authorization/roleAssignments@2022-04-01' = [for roleId in storageBlobRoleIds: {
-  scope: serviceBusNamespace
+  scope: blobStorageAccount
   name: guid(logicApp.id, roleId)
   properties: {
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', roleId)  
@@ -149,6 +148,7 @@ resource logicApp 'Microsoft.Web/sites@2022-09-01' = {
       APP_KIND: 'workflowApp'
       serviceBus_fullyQualifiedNamespace: '${serviceBusNamespace.name}.servicebus.windows.net'
       AzureCosmosDB_connectionString: cosmosDbAccount.listConnectionStrings().connectionStrings[0].connectionString
+      AzureBlob_blobStorageEndpoint: blobStorageAccount.properties.primaryEndpoints.blob
       APPLICATIONINSIGHTS_CONNECTION_STRING: applicationInsights.properties.ConnectionString
     }
   }

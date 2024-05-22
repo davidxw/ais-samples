@@ -14,6 +14,43 @@
                     ]
                 },
                 "runAfter": {}
+            },
+            "Upload_blob_to_storage_container": {
+                "type": "ServiceProvider",
+                "inputs": {
+                    "parameters": {
+                        "containerName": "/s1-sub1-final",
+                        "blobName": "@variables('blobName')",
+                        "content": "@variables('messageBody')"
+                    },
+                    "serviceProviderConfiguration": {
+                        "connectionName": "AzureBlob",
+                        "operationId": "uploadBlob",
+                        "serviceProviderId": "/serviceProviders/AzureBlob"
+                    }
+                },
+                "runAfter": {
+                    "Create_blob_name": [
+                        "SUCCEEDED"
+                    ]
+                }
+            },
+            "Create_blob_name": {
+                "type": "InitializeVariable",
+                "inputs": {
+                    "variables": [
+                        {
+                            "name": "blobName",
+                            "type": "string",
+                            "value": "@{concat(guid(),'.xml')}"
+                        }
+                    ]
+                },
+                "runAfter": {
+                    "Decode_message_body": [
+                        "SUCCEEDED"
+                    ]
+                }
             }
         },
         "contentVersion": "1.0.0.0",
