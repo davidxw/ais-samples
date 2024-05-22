@@ -25,7 +25,7 @@
                         "isUpsert": true
                     },
                     "serviceProviderConfiguration": {
-                        "connectionName": "AzureCosmosDB",
+                        "connectionName": "cosmosDb",
                         "operationId": "CreateOrUpdateDocument",
                         "serviceProviderId": "/serviceProviders/AzureCosmosDB"
                     }

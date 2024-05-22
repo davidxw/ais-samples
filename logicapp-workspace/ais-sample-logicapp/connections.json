@@ -13,14 +13,14 @@
         "id": "/serviceProviders/serviceBus"
       }
     },
-    "AzureCosmosDB": {
+    "cosmosDb": {
       "parameterValues": {
         "connectionString": "@appsetting('AzureCosmosDB_connectionString')"
       },
       "serviceProvider": {
         "id": "/serviceProviders/AzureCosmosDB"
       },
-      "displayName": "cosmosDb-connectionString"
+      "displayName": "cosmosDb"
     }
   },
   "managedApiConnections": {}
