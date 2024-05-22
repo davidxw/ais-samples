@@ -8,14 +8,30 @@
                     "parameters": {
                         "entityName": "s1-processed",
                         "message": {
-                            "contentData": "@triggerBody()?['contentData']",
-                            "contentType": "@triggerBody()?['contentType']"
+                            "contentData": "@body('Transform_using_Data_Mapper_XSLT')",
+                            "contentType": "application/xml"
                         }
                     },
                     "serviceProviderConfiguration": {
                         "connectionName": "serviceBus",
                         "operationId": "sendMessage",
                         "serviceProviderId": "/serviceProviders/serviceBus"
+                    }
+                },
+                "runAfter": {
+                    "Transform_using_Data_Mapper_XSLT": [
+                        "SUCCEEDED"
+                    ]
+                }
+            },
+            "Transform_using_Data_Mapper_XSLT": {
+                "type": "Xslt",
+                "kind": "DataMapper",
+                "inputs": {
+                    "content": "@triggerBody()?['contentData']",
+                    "map": {
+                        "source": "LogicApp",
+                        "name": "s1-input-to-canonical.xslt"
                     }
                 },
                 "runAfter": {}

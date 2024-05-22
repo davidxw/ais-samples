@@ -1,27 +1,63 @@
 {
-  "definition": {
-    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
-    "actions": {},
-    "contentVersion": "1.0.0.0",
-    "outputs": {},
-    "triggers": {
-      "When_messages_are_available_in_a_topic": {
-        "type": "ServiceProvider",
-        "inputs": {
-          "parameters": {
-            "topicName": "s1-processed",
-            "subscriptionName": "s1-sub3",
-            "isSessionsEnabled": false
-          },
-          "serviceProviderConfiguration": {
-            "connectionName": "serviceBus",
-            "operationId": "receiveTopicMessages",
-            "serviceProviderId": "/serviceProviders/serviceBus"
+    "definition": {
+        "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+        "actions": {
+            "Initialize_variable": {
+                "type": "InitializeVariable",
+                "inputs": {
+                    "variables": [
+                        {
+                            "name": "messageBody",
+                            "type": "object",
+                            "value": "@xml(triggerBody()?['contentData'])"
+                        }
+                    ]
+                },
+                "runAfter": {}
+            },
+            "Send_message": {
+              "type": "ServiceProvider",
+              "inputs": {
+                  "parameters": {
+                      "entityName": "s1-sub1-output",
+                      "message": {
+                          "contentData": "@variables('messageBody')",
+                          "contentType": "application/xml"
+                      }
+                  },
+                  "serviceProviderConfiguration": {
+                      "connectionName": "serviceBus",
+                      "operationId": "sendMessage",
+                      "serviceProviderId": "/serviceProviders/serviceBus"
+                  }
+              },
+              "runAfter": {
+                  "Initialize_variable": [
+                      "SUCCEEDED"
+                  ]
+              }
           }
         },
-        "splitOn": "@triggerOutputs()?['body']"
-      }
-    }
-  },
-  "kind": "Stateful"
+        "contentVersion": "1.0.0.0",
+        "outputs": {},
+        "triggers": {
+            "When_messages_are_available_in_a_topic": {
+                "type": "ServiceProvider",
+                "inputs": {
+                    "parameters": {
+                        "topicName": "s1-processed",
+                        "subscriptionName": "s1-sub3",
+                        "isSessionsEnabled": false
+                    },
+                    "serviceProviderConfiguration": {
+                        "connectionName": "serviceBus",
+                        "operationId": "receiveTopicMessages",
+                        "serviceProviderId": "/serviceProviders/serviceBus"
+                    }
+                },
+                "splitOn": "@triggerOutputs()?['body']"
+            }
+        }
+    },
+    "kind": "Stateful"
 }

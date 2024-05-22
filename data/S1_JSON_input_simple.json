@@ -1,0 +1,223 @@
+{
+  "ProcessShipment": {
+    "@languageCode": "EN",
+    "@releaseID": "10.5",
+    "@systemEnvironmentCode": "Production",
+    "@versionID": "1.0",
+    "ApplicationArea": {
+      "Sender": {
+        "LogicalID": {
+          "@schemeAgencyID": "abc.com",
+          "$": "SAPECC"
+        },
+        "ReferenceID": {
+          "@schemeAgencyID": "SAPECC",
+          "$": "0000005640593349"
+        },
+        "ConfirmationCodes": {
+          "ConfirmationCode": "Always"
+        }
+      },
+      "Receiver": {
+        "LogicalID": {
+          "@schemeAgencyID": "abc.com",
+          "$": "ESB"
+        }
+      },
+      "CreationDateTime": "2023-03-01T09:25:13.0",
+      "ScenarioID": {
+        "@schemeID": "StoreOrder"
+      }
+    },
+    "DataArea": {
+      "Shipment": {
+        "@typeCode": "NL",
+        "ShipmentHeader": {
+          "DocumentReference": {
+            "@typeCode": "CustomerPO",
+            "ID": {
+              "@typeCode": "OutboundDelivery",
+              "$": "0001916448"
+            }
+          },
+          "DeliveryReference": {
+            "ID": "1916448"
+          },
+          "ShipmentReleaseDateTime": "2023-03-03T17:00:00.0",
+          "ActualShipDateTime": "2023-03-03T17:00:00.0",
+          "ScheduledDeliveryDateTime": "2023-03-03T17:00:00.0",
+          "SupplierParty": {
+            "ID": "9715",
+            "Name": "AB - abc"
+          },
+          "ShipToParty": {
+            "ID": "0000009740",
+            "Location": {
+              "Address": {
+                "Name": "abc",
+                "StreetName": "abc",
+                "CityName": "pqrs",
+                "CountrySubDivisionCode": "IND",
+                "CountryCode": "NZ",
+                "PostalCode": "4130"
+              },
+              "Contact": {
+                "TelephoneCommunication": "",
+                "EMailAddressCommunication": ""
+              },
+              "GLNID": 9300633097400
+            }
+          },
+          "LoadingDateTime": "2023-03-02T23:59:00.0",
+          "PriorityCode": "N",
+          "Event": {
+            "@typeCode": "Roster",
+            "StartDateTime": "2023-03-01T00:00:00.0"
+          },
+          "Extension": {
+            "Code": {
+              "@typeCode": "DCMCS",
+              "$": "RESV"
+            },
+            "ID": {
+              "@typeCode": "SalesOrg",
+              "$": "2030"
+            },
+            "Name": {
+              "@typeCode": "Roster",
+              "$": "' '"
+            }
+          }
+        },
+        "ShipmentItem": [
+          {
+            "Item": {
+              "ID": "00000000000016673",
+              "Packaging": {
+                "@typeCode": "TradeUnit",
+                "PerPackageQuantity": "000000006"
+              },
+              "Extension": {
+                "Number": {
+                  "@typeCode": "LineNumberID",
+                  "$": "000010"
+                }
+              }
+            },
+            "Quantity": {
+              "@typeCode": "ShippedQtyInBaseUoM",
+              "$": "108.000"
+            },
+            "ShippedQuantity": {
+              "@typeCode": "IssueUoM",
+              "$": "18.000"
+            },
+            "Extension": {
+              "Code": {
+                "@typeCode": "PartialControl",
+                "$": "B"
+              }
+            }
+          },
+          {
+            "Item": {
+              "ID": "00000000000016450",
+              "Packaging": {
+                "@typeCode": "TradeUnit",
+                "PerPackageQuantity": "000000006"
+              },
+              "Extension": {
+                "Number": [
+                  {
+                    "@typeCode": "LineNumberID",
+                    "$": "000020"
+                  }
+                ]
+              }
+            },
+            "Quantity": {
+              "@typeCode": "ShippedQtyInBaseUoM",
+              "$": "90.000"
+            },
+            "ShippedQuantity": {
+              "@typeCode": "IssueUoM",
+              "$": "15.000"
+            },
+            "Extension": {
+              "Code": [
+                {
+                  "@typeCode": "PartialControl",
+                  "$": "B"
+                }
+              ]
+            }
+          },
+          {
+            "Item": {
+              "ID": "000000000000094675",
+              "Packaging": {
+                "@typeCode": "TradeUnit",
+                "PerPackageQuantity": "000000006"
+              },
+              "Extension": {
+                "Number": [
+                  {
+                    "@typeCode": "LineNumberID",
+                    "$": "000030"
+                  }
+                ]
+              }
+            },
+            "Quantity": {
+              "@typeCode": "ShippedQtyInBaseUoM",
+              "$": "450.000"
+            },
+            "ShippedQuantity": {
+              "@typeCode": "IssueUoM",
+              "$": "75.000"
+            },
+            "Extension": {
+              "Code": {
+                "@typeCode": "PartialControl",
+                "$": "B"
+              }
+            }
+          },
+          {
+            "Item": {
+              "ID": "000000000000698861",
+              "Packaging": {
+                "@typeCode": "TradeUnit",
+                "PerPackageQuantity": "000000006"
+              },
+              "Extension": {
+                "Number": [
+                  {
+                    "@typeCode": "LineNumberID",
+                    "$": "000580"
+                  }
+                ]
+              }
+            },
+            "Quantity": {
+              "@typeCode": "ShippedQtyInBaseUoM",
+              "$": "504.000"
+            },
+            "ShippedQuantity": {
+              "@typeCode": "IssueUoM",
+              "$": "84.000"
+            },
+            "Extension": {
+              "Code": [
+                {
+                  "@typeCode": "PartialControl",
+                  "$": "B"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  }
+}

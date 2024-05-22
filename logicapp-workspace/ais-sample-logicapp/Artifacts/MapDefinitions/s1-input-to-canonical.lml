@@ -1,0 +1,25 @@
+$version: 1
+$input: JSON
+$output: XML
+$sourceSchema: S1_JSON_input_SCHEMA_simple.json
+$targetSchema: S1_XML_canonical.xsd
+$targetNamespaces:
+  xs: http://www.w3.org/2001/XMLSchema
+GT_OutboundOrders:
+  ShipToCustomer:
+    ClientID: /root/ProcessShipment/DataArea/Shipment/ShipmentHeader/ShipToParty/ID
+    AddressName: >-
+      /root/ProcessShipment/DataArea/Shipment/ShipmentHeader/ShipToParty/Location/Address/Name
+    AddressLine1: >-
+      /root/ProcessShipment/DataArea/Shipment/ShipmentHeader/ShipToParty/Location/Address/StreetName
+    AddressCity: >-
+      /root/ProcessShipment/DataArea/Shipment/ShipmentHeader/ShipToParty/Location/Address/CityName
+    AddressPostalCode: >-
+      int(/root/ProcessShipment/DataArea/Shipment/ShipmentHeader/ShipToParty/Location/Address/PostalCode)
+    AddressCountryName: >-
+      /root/ProcessShipment/DataArea/Shipment/ShipmentHeader/ShipToParty/Location/Address/CountryCode
+  OrderSegment:
+    ClientID: /root/ProcessShipment/DataArea/Shipment/ShipmentHeader/ShipToParty/ID
+    $for(/root/ProcessShipment/DataArea/Shipment/ShipmentItem/*):
+      OrderLineSegment:
+        ItemNumber: int(Item/ID)
