@@ -1,27 +1,62 @@
 {
-  "definition": {
-    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
-    "actions": {},
-    "contentVersion": "1.0.0.0",
-    "outputs": {},
-    "triggers": {
-      "When_messages_are_available_in_a_topic": {
-        "type": "ServiceProvider",
-        "inputs": {
-          "parameters": {
-            "topicName": "s1-processed",
-            "subscriptionName": "s1-sub2",
-            "isSessionsEnabled": false
-          },
-          "serviceProviderConfiguration": {
-            "connectionName": "serviceBus",
-            "operationId": "receiveTopicMessages",
-            "serviceProviderId": "/serviceProviders/serviceBus"
-          }
+    "definition": {
+        "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+        "actions": {
+            "Decode_messageBody": {
+                "type": "InitializeVariable",
+                "inputs": {
+                    "variables": [
+                        {
+                            "name": "messageBody",
+                            "type": "object",
+                            "value": "@xml(triggerBody()?['contentData'])"
+                        }
+                    ]
+                },
+                "runAfter": {}
+            },
+            "Create_or_update_item": {
+                "type": "ServiceProvider",
+                "inputs": {
+                    "parameters": {
+                        "databaseId": "ais-samples-db",
+                        "containerId": "s1-sub2-final",
+                        "item": "@json(variables('messageBody'))",
+                        "isUpsert": true
+                    },
+                    "serviceProviderConfiguration": {
+                        "connectionName": "AzureCosmosDB",
+                        "operationId": "CreateOrUpdateDocument",
+                        "serviceProviderId": "/serviceProviders/AzureCosmosDB"
+                    }
+                },
+                "runAfter": {
+                    "Decode_messageBody": [
+                        "SUCCEEDED"
+                    ]
+                }
+            }
         },
-        "splitOn": "@triggerOutputs()?['body']"
-      }
-    }
-  },
-  "kind": "Stateful"
+        "contentVersion": "1.0.0.0",
+        "outputs": {},
+        "triggers": {
+            "When_messages_are_available_in_a_topic": {
+                "type": "ServiceProvider",
+                "inputs": {
+                    "parameters": {
+                        "topicName": "s1-processed",
+                        "subscriptionName": "s1-sub2",
+                        "isSessionsEnabled": false
+                    },
+                    "serviceProviderConfiguration": {
+                        "connectionName": "serviceBus",
+                        "operationId": "receiveTopicMessages",
+                        "serviceProviderId": "/serviceProviders/serviceBus"
+                    }
+                },
+                "splitOn": "@triggerOutputs()?['body']"
+            }
+        }
+    },
+    "kind": "Stateful"
 }

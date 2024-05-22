@@ -16,6 +16,9 @@ param logAnalyticsWorkspaceName string
 @description('The name of the Application Insights instance')
 param applicationInsightsName string
 
+@description('The name of the Cosmos DB account')
+param cosmosDBAccountName string
+
 @description('The email address of the owner of the service')
 @minLength(1)
 param publisherEmail string = 'test@test.com'
@@ -33,11 +36,15 @@ var logicAppPlanTokenName = toLower('${logicAppName}-plan-${resourceToken}')
 var logicAppTokenName = toLower('${logicAppName}-${resourceToken}')
 var serviceBusNamespaceTokenName = toLower('${serviceBusNamespaceName}-${resourceToken}')
 var logAnalyticsWorkspaceTokenName = toLower('${logAnalyticsWorkspaceName}-${resourceToken}')
+var cosmosDBAccountTokenName = toLower('${cosmosDBAccountName}-${resourceToken}')
 
 var listQueues = ['s1-received','s1-sub1-output']
 var s1topicName = 's1-processed'
 var listBlobContainers = ['s1-sub1','s3-final']
 var listSubscriptionNames = ['s1-sub1','s1-sub2', 's1-sub3']
+
+var cosmosDatabaseName = 'ais-samples-db'
+var cosmosS1Sub2ContainerName = 's1-sub2-final'
 
 //
 // API Management
@@ -141,6 +148,7 @@ resource logicApp 'Microsoft.Web/sites@2022-09-01' = {
       AzureFunctionsJobHost__extensionBundle__version: '${'[1.*,'}${' 2.0.0)'}'
       APP_KIND: 'workflowApp'
       serviceBus_fullyQualifiedNamespace: '${serviceBusNamespace.name}.servicebus.windows.net'
+      AzureCosmosDB_connectionString: cosmosDbAccount.listConnectionStrings().connectionStrings[0].connectionString
       APPLICATIONINSIGHTS_CONNECTION_STRING: applicationInsights.properties.ConnectionString
     }
   }
@@ -197,7 +205,10 @@ resource serviceBusRbac 'Microsoft.Authorization/roleAssignments@2022-04-01' = [
   }
 }]
 
+//
 // logging and monitoring
+//
+
 resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2021-12-01-preview' = {
   name: logAnalyticsWorkspaceTokenName
   location: location
@@ -212,5 +223,51 @@ resource applicationInsights 'Microsoft.Insights/components@2020-02-02' = {
     Flow_Type: 'Redfield'
     IngestionMode: 'LogAnalytics'
     WorkspaceResourceId: logAnalyticsWorkspace.id
+  }
+}
+
+//
+// Cosmos DB
+//
+
+resource cosmosDbAccount 'Microsoft.DocumentDB/databaseAccounts@2023-04-15' = {
+  name: cosmosDBAccountTokenName
+  location: location
+  kind: 'GlobalDocumentDB'
+  properties: {
+    databaseAccountOfferType: 'Standard'
+    locations: [
+      {
+        locationName: location
+        failoverPriority: 0
+      }
+    ]
+    disableKeyBasedMetadataWriteAccess: true
+  }
+}
+
+resource database 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases@2022-05-15' = {
+  name: cosmosDatabaseName
+  parent: cosmosDbAccount
+  properties: {
+    resource: {
+      id: cosmosDatabaseName
+    }
+  }
+}
+
+resource historyContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2022-05-15' = {
+  name: cosmosS1Sub2ContainerName
+  parent: database
+  properties: {
+    resource: {
+      id: cosmosS1Sub2ContainerName
+      partitionKey: {
+        paths: [
+          '/GT_OutboundOrders/ShipToCustomer/ClientID'
+        ]
+        kind: 'Hash'
+      }
+    }
   }
 }

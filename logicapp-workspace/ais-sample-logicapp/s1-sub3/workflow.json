@@ -2,7 +2,7 @@
     "definition": {
         "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
         "actions": {
-            "Initialize_variable": {
+            "Decode_message_body": {
                 "type": "InitializeVariable",
                 "inputs": {
                     "variables": [
@@ -16,27 +16,27 @@
                 "runAfter": {}
             },
             "Send_message": {
-              "type": "ServiceProvider",
-              "inputs": {
-                  "parameters": {
-                      "entityName": "s1-sub1-output",
-                      "message": {
-                          "contentData": "@variables('messageBody')",
-                          "contentType": "application/xml"
-                      }
-                  },
-                  "serviceProviderConfiguration": {
-                      "connectionName": "serviceBus",
-                      "operationId": "sendMessage",
-                      "serviceProviderId": "/serviceProviders/serviceBus"
-                  }
-              },
-              "runAfter": {
-                  "Initialize_variable": [
-                      "SUCCEEDED"
-                  ]
-              }
-          }
+                "type": "ServiceProvider",
+                "inputs": {
+                    "parameters": {
+                        "entityName": "s1-sub1-output",
+                        "message": {
+                            "contentData": "@variables('messageBody')",
+                            "contentType": "application/xml"
+                        }
+                    },
+                    "serviceProviderConfiguration": {
+                        "connectionName": "serviceBus",
+                        "operationId": "sendMessage",
+                        "serviceProviderId": "/serviceProviders/serviceBus"
+                    }
+                },
+                "runAfter": {
+                    "Decode_message_body": [
+                        "SUCCEEDED"
+                    ]
+                }
+            }
         },
         "contentVersion": "1.0.0.0",
         "outputs": {},
