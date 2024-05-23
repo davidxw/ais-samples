@@ -38,7 +38,7 @@ var serviceBusNamespaceTokenName = toLower('${serviceBusNamespaceName}-${resourc
 var logAnalyticsWorkspaceTokenName = toLower('${logAnalyticsWorkspaceName}-${resourceToken}')
 var cosmosDBAccountTokenName = toLower('${cosmosDBAccountName}-${resourceToken}')
 
-var listQueues = ['s1-received','s1-sub1-output']
+var listQueues = ['s1-received','s1-sub1-output','s2-received','s3-received']
 var s1topicName = 's1-processed'
 var listBlobContainers = ['s1-sub1-final','s3-final']
 var listSubscriptionNames = ['s1-sub1','s1-sub2', 's1-sub3']

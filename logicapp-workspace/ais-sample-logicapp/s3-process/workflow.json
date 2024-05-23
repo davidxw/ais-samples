@@ -1,0 +1,61 @@
+{
+    "definition": {
+        "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+        "actions": {
+            "Upload_blob_to_storage_container": {
+                "type": "ServiceProvider",
+                "description": "This action currently just saved the XML document to blob storage. An additional step is need to encode the XML document to flat file format, but a flat file schema is required for this.",
+                "inputs": {
+                    "parameters": {
+                        "containerName": "/s3-final",
+                        "blobName": "@variables('blobName')",
+                        "content": "@triggerBody()?['contentData']"
+                    },
+                    "serviceProviderConfiguration": {
+                        "connectionName": "AzureBlob",
+                        "operationId": "uploadBlob",
+                        "serviceProviderId": "/serviceProviders/AzureBlob"
+                    }
+                },
+                "runAfter": {
+                    "Create_blob_name": [
+                        "SUCCEEDED"
+                    ]
+                }
+            },
+            "Create_blob_name": {
+                "type": "InitializeVariable",
+                "inputs": {
+                    "variables": [
+                        {
+                            "name": "blobName",
+                            "type": "string",
+                            "value": "@{concat(guid(),'.xml')}"
+                        }
+                    ]
+                },
+                "runAfter": {}
+            }
+        },
+        "contentVersion": "1.0.0.0",
+        "outputs": {},
+        "triggers": {
+            "When_messages_are_available_in_a_queue": {
+                "type": "ServiceProvider",
+                "inputs": {
+                    "parameters": {
+                        "queueName": "s3-received",
+                        "isSessionsEnabled": false
+                    },
+                    "serviceProviderConfiguration": {
+                        "connectionName": "serviceBus",
+                        "operationId": "receiveQueueMessages",
+                        "serviceProviderId": "/serviceProviders/serviceBus"
+                    }
+                },
+                "splitOn": "@triggerOutputs()?['body']"
+            }
+        }
+    },
+    "kind": "Stateful"
+}
