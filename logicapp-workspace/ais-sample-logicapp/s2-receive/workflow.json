@@ -8,7 +8,7 @@
                     "parameters": {
                         "entityName": "s2-received",
                         "message": {
-                            "contentData": "@triggerBody()",
+                            "contentData": "@triggerBody()?['content']",
                             "contentType": "application/json"
                         }
                     },
@@ -24,9 +24,23 @@
         "contentVersion": "1.0.0.0",
         "outputs": {},
         "triggers": {
-            "When_a_HTTP_request_is_received": {
-                "type": "Request",
-                "kind": "Http"
+            "When_an_item_is_created_or_modified": {
+                "type": "ServiceProvider",
+                "description": "",
+                "inputs": {
+                    "parameters": {
+                        "databaseName": "ais-samples-db",
+                        "collectionName": "Employees",
+                        "leaseCollectionName": "leases",
+                        "createLeaseCollectionIfNotExists": true
+                    },
+                    "serviceProviderConfiguration": {
+                        "connectionName": "cosmosDb",
+                        "operationId": "whenADocumentIsCreatedOrModified",
+                        "serviceProviderId": "/serviceProviders/AzureCosmosDB"
+                    }
+                },
+                "splitOn": "@triggerOutputs()?['body']"
             }
         }
     },

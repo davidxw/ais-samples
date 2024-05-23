@@ -28,7 +28,7 @@ param publisherEmail string = 'test@test.com'
 param publisherName string = 'Contoso'
 
 param location string = resourceGroup().location
-param resourceToken string = toLower(uniqueString(subscription().id, resourceGroup().id,  location))
+param resourceToken string = toLower(uniqueString(subscription().id, resourceGroup().id, location))
 
 var apiManagementServiceTokenName = toLower('${apiManagementServiceName}-${resourceToken}')
 var blobStorageAccountTokenName = toLower('${blobStorageAccountName}${resourceToken}')
@@ -38,13 +38,14 @@ var serviceBusNamespaceTokenName = toLower('${serviceBusNamespaceName}-${resourc
 var logAnalyticsWorkspaceTokenName = toLower('${logAnalyticsWorkspaceName}-${resourceToken}')
 var cosmosDBAccountTokenName = toLower('${cosmosDBAccountName}-${resourceToken}')
 
-var listQueues = ['s1-received','s1-sub1-output','s2-received','s3-received']
+var listQueues = [ 's1-received', 's1-sub1-output', 's2-received', 's3-received' ]
 var s1topicName = 's1-processed'
-var listBlobContainers = ['s1-sub1-final','s3-final']
-var listSubscriptionNames = ['s1-sub1','s1-sub2', 's1-sub3']
+var listBlobContainers = [ 's1-sub1-final', 's3-final' ]
+var listSubscriptionNames = [ 's1-sub1', 's1-sub2', 's1-sub3' ]
 
 var cosmosDatabaseName = 'ais-samples-db'
 var cosmosS1Sub2ContainerName = 's1-sub2-final'
+var cosmosS2ContainerName = 'Employees'
 
 //
 // API Management
@@ -83,7 +84,7 @@ resource blobServices 'Microsoft.Storage/storageAccounts/blobServices@2023-01-01
   name: 'default'
 }
 
-resource symbolicname 'Microsoft.Storage/storageAccounts/blobServices/containers@2023-01-01' = [for name in listBlobContainers:{
+resource symbolicname 'Microsoft.Storage/storageAccounts/blobServices/containers@2023-01-01' = [for name in listBlobContainers: {
   name: name
   parent: blobServices
   properties: {
@@ -99,7 +100,7 @@ resource storageAccountRbac 'Microsoft.Authorization/roleAssignments@2022-04-01'
   scope: blobStorageAccount
   name: guid(logicApp.id, roleId)
   properties: {
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', roleId)  
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', roleId)
     principalType: 'ServicePrincipal'
     principalId: logicApp.identity.principalId
   }
@@ -166,7 +167,7 @@ resource serviceBusNamespace 'Microsoft.ServiceBus/namespaces@2022-01-01-preview
   properties: {}
 }
 
-resource serviceBusQueues 'Microsoft.ServiceBus/namespaces/queues@2022-01-01-preview' = [for name in listQueues:{
+resource serviceBusQueues 'Microsoft.ServiceBus/namespaces/queues@2022-01-01-preview' = [for name in listQueues: {
   name: name
   parent: serviceBusNamespace
   properties: {
@@ -199,7 +200,7 @@ resource serviceBusRbac 'Microsoft.Authorization/roleAssignments@2022-04-01' = [
   scope: serviceBusNamespace
   name: guid(logicApp.id, roleId)
   properties: {
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', roleId)  
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', roleId)
     principalType: 'ServicePrincipal'
     principalId: logicApp.identity.principalId
   }
@@ -253,10 +254,15 @@ resource database 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases@2022-05-15
     resource: {
       id: cosmosDatabaseName
     }
+    options: {
+      autoscaleSettings: {
+        maxThroughput: 5000
+      }
+    }
   }
 }
 
-resource historyContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2022-05-15' = {
+resource s1sub2container 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2022-05-15' = {
   name: cosmosS1Sub2ContainerName
   parent: database
   properties: {
@@ -265,6 +271,22 @@ resource historyContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/co
       partitionKey: {
         paths: [
           '/GT_OutboundOrders/ShipToCustomer/ClientID'
+        ]
+        kind: 'Hash'
+      }
+    }
+  }
+}
+
+resource s2container 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2022-05-15' = {
+  name: cosmosS2ContainerName
+  parent: database
+  properties: {
+    resource: {
+      id: cosmosS2ContainerName
+      partitionKey: {
+        paths: [
+          '/position'
         ]
         kind: 'Hash'
       }
