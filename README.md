@@ -44,7 +44,7 @@ az deployment group create --resource-group rg-ais-samples --parameters ./sample
 
 This will create the following resources which are used by the sample scenarios. 
 
-![A diagram showing the Azure resources used in the solution](ais-sample.drawio.svg)
+![A diagram showing the Azure resources used in the solution](diagrams/ais-sample.drawio.svg)
 
 ### Notes
 
@@ -54,3 +54,15 @@ This will create the following resources which are used by the sample scenarios.
 * All logic app workflows are deployed to the same logic app instance. Depending on your own requirements you may want to deploy these to separate instances.
 
 Sharepoint and Mailbox
+
+## Scenario 1
+
+![A diagram showing the details of scenario 1](diagrams/ais-sample-s1.drawio.svg)
+
+## Senario 2
+
+![A diagram showing the details of scenario 2](diagrams/ais-sample-s2.drawio.svg)
+
+## Scenario 3
+
+![A diagram showing the details of scenario 3](diagrams/ais-sample-s3.drawio.svg)

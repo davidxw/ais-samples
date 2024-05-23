@@ -17,6 +17,7 @@
             },
             "Upload_blob_to_storage_container": {
                 "type": "ServiceProvider",
+                "description": "This action currently just saved the XML document to blob storage. An additional step is need to encode the XML document to flat file format, but a flat file schema is required for this.",
                 "inputs": {
                     "parameters": {
                         "containerName": "/s1-sub1-final",
