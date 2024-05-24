@@ -21,6 +21,13 @@
                         "actions": {},
                         "else": {
                             "actions": {
+                                "Decode_base64_content": {
+                                    "type": "SetVariable",
+                                    "inputs": {
+                                        "name": "attachmentContent",
+                                        "value": "@base64ToBinary(item()?['contentBytes'])"
+                                    }
+                                },
                                 "Send_message": {
                                     "type": "ServiceProvider",
                                     "inputs": {
@@ -31,7 +38,8 @@
                                                 "contentType": "application/json",
                                                 "userProperties": {
                                                     "FileName": "@{item()?['name']}"
-                                                }
+                                                },
+                                                "label": "@item()?['name']"
                                             }
                                         },
                                         "serviceProviderConfiguration": {
@@ -44,13 +52,6 @@
                                         "Decode_base64_content": [
                                             "SUCCEEDED"
                                         ]
-                                    }
-                                },
-                                "Decode_base64_content": {
-                                    "type": "SetVariable",
-                                    "inputs": {
-                                        "name": "attachmentContent",
-                                        "value": "@base64ToBinary(item()?['contentBytes'])"
                                     }
                                 }
                             }

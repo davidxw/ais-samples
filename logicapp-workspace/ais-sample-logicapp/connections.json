@@ -48,5 +48,4 @@
       "authentication": "@parameters('office365-Authentication')"
     }
   }
-
 }
