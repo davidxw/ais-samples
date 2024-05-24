@@ -1,34 +1,123 @@
 {
-  "definition": {
-      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
-      "actions": {
-          "Send_message": {
-              "type": "ServiceProvider",
-              "inputs": {
-                  "parameters": {
-                      "entityName": "s3-received",
-                      "message": {
-                          "contentData": "@triggerBody()",
-                          "contentType": "application/json"
-                      }
-                  },
-                  "serviceProviderConfiguration": {
-                      "connectionName": "serviceBus",
-                      "operationId": "sendMessage",
-                      "serviceProviderId": "/serviceProviders/serviceBus"
-                  }
-              },
-              "runAfter": {}
-          }
-      },
-      "contentVersion": "1.0.0.0",
-      "outputs": {},
-      "triggers": {
-          "When_a_HTTP_request_is_received": {
-              "type": "Request",
-              "kind": "Http"
-          }
-      }
-  },
-  "kind": "Stateful"
+    "definition": {
+        "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+        "actions": {
+            "For_each_attachment": {
+                "type": "Foreach",
+                "foreach": "@triggerBody()?['attachments']",
+                "actions": {
+                    "Is_attachment_inline": {
+                        "type": "If",
+                        "expression": {
+                            "and": [
+                                {
+                                    "equals": [
+                                        "@item()?['isInline']",
+                                        true
+                                    ]
+                                }
+                            ]
+                        },
+                        "actions": {},
+                        "else": {
+                            "actions": {
+                                "Send_message": {
+                                    "type": "ServiceProvider",
+                                    "inputs": {
+                                        "parameters": {
+                                            "entityName": "s3-received",
+                                            "message": {
+                                                "contentData": "@variables('attachmentContent')",
+                                                "contentType": "application/json",
+                                                "userProperties": {
+                                                    "FileName": "@{item()?['name']}"
+                                                }
+                                            }
+                                        },
+                                        "serviceProviderConfiguration": {
+                                            "connectionName": "serviceBus",
+                                            "operationId": "sendMessage",
+                                            "serviceProviderId": "/serviceProviders/serviceBus"
+                                        }
+                                    },
+                                    "runAfter": {
+                                        "Decode_base64_content": [
+                                            "SUCCEEDED"
+                                        ]
+                                    }
+                                },
+                                "Decode_base64_content": {
+                                    "type": "SetVariable",
+                                    "inputs": {
+                                        "name": "attachmentContent",
+                                        "value": "@base64ToBinary(item()?['contentBytes'])"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "runAfter": {
+                    "Initialize_variable": [
+                        "SUCCEEDED"
+                    ]
+                }
+            },
+            "Initialize_variable": {
+                "type": "InitializeVariable",
+                "inputs": {
+                    "variables": [
+                        {
+                            "name": "attachmentContent",
+                            "type": "object"
+                        }
+                    ]
+                },
+                "runAfter": {}
+            }
+        },
+        "contentVersion": "1.0.0.0",
+        "outputs": {},
+        "triggers": {
+            "When_a_new_email_arrives_(V3)": {
+                "type": "ApiConnectionNotification",
+                "inputs": {
+                    "host": {
+                        "connection": {
+                            "referenceName": "office365"
+                        }
+                    },
+                    "fetch": {
+                        "pathTemplate": {
+                            "template": "/v3/Mail/OnNewEmail"
+                        },
+                        "method": "get",
+                        "queries": {
+                            "importance": "Any",
+                            "fetchOnlyWithAttachment": true,
+                            "includeAttachments": true,
+                            "subjectFilter": "#toll",
+                            "folderPath": "Inbox"
+                        }
+                    },
+                    "subscribe": {
+                        "body": {
+                            "NotificationUrl": "@{listCallbackUrl()}"
+                        },
+                        "pathTemplate": {
+                            "template": "/GraphMailSubscriptionPoke/$subscriptions"
+                        },
+                        "method": "post",
+                        "queries": {
+                            "importance": "Any",
+                            "fetchOnlyWithAttachment": true,
+                            "folderPath": "Inbox"
+                        }
+                    }
+                },
+                "splitOn": "@triggerBody()?['value']"
+            }
+        }
+    },
+    "kind": "Stateful"
 }

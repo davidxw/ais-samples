@@ -36,5 +36,16 @@
       "displayName": "blobStorage"
     }
   },
-  "managedApiConnections": {}
+  "managedApiConnections": {
+    "office365": {
+      "api": {
+        "id": "/subscriptions/5b3860b3-e335-4ba8-af73-98c1d15de6e8/providers/Microsoft.Web/locations/australiaeast/managedApis/office365"
+      },
+      "connection": {
+        "id": "/subscriptions/5b3860b3-e335-4ba8-af73-98c1d15de6e8/resourceGroups/rg-ais-samples/providers/Microsoft.Web/connections/office365"
+      },
+      "connectionRuntimeUrl": "@parameters('office365-ConnectionRuntimeUrl')",
+      "authentication": "@parameters('office365-Authentication')"
+    }
+  }
 }

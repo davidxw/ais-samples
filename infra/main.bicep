@@ -151,9 +151,48 @@ resource logicApp 'Microsoft.Web/sites@2022-09-01' = {
       AzureCosmosDB_connectionString: cosmosDbAccount.listConnectionStrings().connectionStrings[0].connectionString
       AzureBlob_blobStorageEndpoint: blobStorageAccount.properties.primaryEndpoints.blob
       APPLICATIONINSIGHTS_CONNECTION_STRING: applicationInsights.properties.ConnectionString
+      WORKFLOWS_RESOURCE_GROUP_NAME: resourceGroup().name
+      WORKFLOWS_SUBSCRIPTION_ID: subscription().id
+      WORKFLOWS_LOCATION_NAME: location
+      WORKFLOWS_TENANT_ID: subscription().tenantId
+      WORKFLOWS_MANAGEMENT_BASE_URI: 'https://management.azure.com/'
+      office365_ConnectionRuntimeUrl: office365APIConnection.properties.connectionRuntimeUrl
     }
   }
 }
+
+//
+// API Connections for Logic App
+// These are required for managed connectors. After deployed you will need to go the portal, select the API Connector, and authorize the connection.
+//
+
+resource office365APIConnection 'Microsoft.Web/connections@2018-07-01-preview' = {
+  name: 'office365'
+  location: location
+  kind: 'V2'
+  properties: {
+    api: {
+      id: subscriptionResourceId('Microsoft.Web/locations/managedApis', location, 'office365')
+    }
+    displayName: 'office365'
+  }
+}
+
+resource office365APIConnectionAccessPolicy 'Microsoft.Web/connections/accessPolicies@2016-06-01' = {
+  parent: office365APIConnection
+  name: 'office365-logicapp-accesspolicy'
+  location: location
+  properties: {
+    principal: {
+      type: 'ActiveDirectory'
+      identity: {
+        tenantId: subscription().tenantId
+        objectId: logicApp.identity.principalId
+      }
+    }
+  }
+}
+
 
 //
 // Service Bus
