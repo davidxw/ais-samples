@@ -34,12 +34,8 @@
                                         "parameters": {
                                             "entityName": "s3-received",
                                             "message": {
-                                                "contentData": "@variables('attachmentContent')",
-                                                "contentType": "application/json",
-                                                "userProperties": {
-                                                    "FileName": "@{item()?['name']}"
-                                                },
-                                                "label": "@item()?['name']"
+                                                "contentData": "@variables('claimsCheck')",
+                                                "contentType": "application/json"
                                             }
                                         },
                                         "serviceProviderConfiguration": {
@@ -49,7 +45,69 @@
                                         }
                                     },
                                     "runAfter": {
+                                        "Save_content_to_blob_storage": [
+                                            "SUCCEEDED"
+                                        ]
+                                    }
+                                },
+                                "Populate_claims_check": {
+                                    "type": "SetVariable",
+                                    "inputs": {
+                                        "name": "claimsCheck",
+                                        "value": {
+                                            "id": "@{variables('runId')}",
+                                            "containerName": "/s3-received",
+                                            "blobName": "@{variables('runId')}-@{item()?['name']}"
+                                        }
+                                    },
+                                    "runAfter": {
                                         "Decode_base64_content": [
+                                            "SUCCEEDED"
+                                        ]
+                                    }
+                                },
+                                "Save_content_to_blob_storage": {
+                                    "type": "ServiceProvider",
+                                    "inputs": {
+                                        "parameters": {
+                                            "containerName": "@body('Parse_JSON')?['containerName']",
+                                            "blobName": "@body('Parse_JSON')?['blobName']",
+                                            "content": "@variables('attachmentContent')"
+                                        },
+                                        "serviceProviderConfiguration": {
+                                            "connectionName": "AzureBlob",
+                                            "operationId": "uploadBlob",
+                                            "serviceProviderId": "/serviceProviders/AzureBlob"
+                                        }
+                                    },
+                                    "runAfter": {
+                                        "Parse_JSON": [
+                                            "SUCCEEDED"
+                                        ]
+                                    }
+                                },
+                                "Parse_JSON": {
+                                    "type": "ParseJson",
+                                    "inputs": {
+                                        "content": "@variables('claimsCheck')",
+                                        "schema": {
+                                            "$schema": "http://json-schema.org/draft-04/schema#",
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string"
+                                                },
+                                                "containerName": {
+                                                    "type": "string"
+                                                },
+                                                "blobName": {
+                                                    "type": "string"
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "runAfter": {
+                                        "Populate_claims_check": [
                                             "SUCCEEDED"
                                         ]
                                     }
@@ -59,18 +117,51 @@
                     }
                 },
                 "runAfter": {
-                    "Initialize_variable": [
+                    "Initialize_claims_check": [
                         "SUCCEEDED"
                     ]
                 }
             },
-            "Initialize_variable": {
+            "Initialize_content_variable": {
                 "type": "InitializeVariable",
                 "inputs": {
                     "variables": [
                         {
                             "name": "attachmentContent",
                             "type": "object"
+                        }
+                    ]
+                },
+                "runAfter": {
+                    "Create_run_ID": [
+                        "SUCCEEDED"
+                    ]
+                }
+            },
+            "Initialize_claims_check": {
+                "type": "InitializeVariable",
+                "inputs": {
+                    "variables": [
+                        {
+                            "name": "claimsCheck",
+                            "type": "object"
+                        }
+                    ]
+                },
+                "runAfter": {
+                    "Initialize_content_variable": [
+                        "SUCCEEDED"
+                    ]
+                }
+            },
+            "Create_run_ID": {
+                "type": "InitializeVariable",
+                "inputs": {
+                    "variables": [
+                        {
+                            "name": "runId",
+                            "type": "string",
+                            "value": "@{guid()}"
                         }
                     ]
                 },

@@ -7,8 +7,8 @@
                 "inputs": {
                     "parameters": {
                         "containerName": "/s3-final",
-                        "blobName": "@variables('blobName')",
-                        "content": "@triggerBody()?['contentData']",
+                        "blobName": "@body('Parse_claims_check')?['blobName']",
+                        "content": "@body('Read_blob_content')?['content']",
                         "overrideIfExists": "true"
                     },
                     "serviceProviderConfiguration": {
@@ -18,23 +18,51 @@
                     }
                 },
                 "runAfter": {
-                    "Create_blob_name": [
+                    "Read_blob_content": [
                         "SUCCEEDED"
                     ]
                 }
             },
-            "Create_blob_name": {
-                "type": "InitializeVariable",
+            "Parse_claims_check": {
+                "type": "ParseJson",
                 "inputs": {
-                    "variables": [
-                        {
-                            "name": "blobName",
-                            "type": "string",
-                            "value": "@triggerBody()?['label']"
+                    "content": "@triggerBody()?['contentData']",
+                    "schema": {
+                        "$schema": "http://json-schema.org/draft-04/schema#",
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "type": "string"
+                            },
+                            "containerName": {
+                                "type": "string"
+                            },
+                            "blobName": {
+                                "type": "string"
+                            }
                         }
-                    ]
+                    }
                 },
                 "runAfter": {}
+            },
+            "Read_blob_content": {
+                "type": "ServiceProvider",
+                "inputs": {
+                    "parameters": {
+                        "containerName": "@body('Parse_claims_check')?['containerName']",
+                        "blobName": "@body('Parse_claims_check')?['blobName']"
+                    },
+                    "serviceProviderConfiguration": {
+                        "connectionName": "AzureBlob",
+                        "operationId": "readBlob",
+                        "serviceProviderId": "/serviceProviders/AzureBlob"
+                    }
+                },
+                "runAfter": {
+                    "Parse_claims_check": [
+                        "SUCCEEDED"
+                    ]
+                }
             }
         },
         "contentVersion": "1.0.0.0",
