@@ -37,6 +37,7 @@ var logicAppTokenName = toLower('${logicAppName}-${resourceToken}')
 var serviceBusNamespaceTokenName = toLower('${serviceBusNamespaceName}-${resourceToken}')
 var logAnalyticsWorkspaceTokenName = toLower('${logAnalyticsWorkspaceName}-${resourceToken}')
 var cosmosDBAccountTokenName = toLower('${cosmosDBAccountName}-${resourceToken}')
+var applicationInsightsTokenName = toLower('${applicationInsightsName}-${resourceToken}')
 
 var listQueues = [ 's1-received', 's1-sub1-output', 's2-received', 's3-received' ]
 var s1topicName = 's1-processed'
@@ -152,7 +153,7 @@ resource logicApp 'Microsoft.Web/sites@2022-09-01' = {
       AzureBlob_blobStorageEndpoint: blobStorageAccount.properties.primaryEndpoints.blob
       APPLICATIONINSIGHTS_CONNECTION_STRING: applicationInsights.properties.ConnectionString
       WORKFLOWS_RESOURCE_GROUP_NAME: resourceGroup().name
-      WORKFLOWS_SUBSCRIPTION_ID: subscription().id
+      WORKFLOWS_SUBSCRIPTION_ID: subscription().subscriptionId
       WORKFLOWS_LOCATION_NAME: location
       WORKFLOWS_TENANT_ID: subscription().tenantId
       WORKFLOWS_MANAGEMENT_BASE_URI: 'https://management.azure.com/'
@@ -255,7 +256,7 @@ resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2021-12
 }
 
 resource applicationInsights 'Microsoft.Insights/components@2020-02-02' = {
-  name: applicationInsightsName
+  name: applicationInsightsTokenName
   location: location
   kind: 'web'
   properties: {
