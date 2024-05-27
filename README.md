@@ -42,6 +42,18 @@ az group create --name rg-ais-samples --location australiaeast
 az deployment group create --resource-group rg-ais-samples --parameters ./sample.bicepparam
 ```
 
+(Authorize connection)
+
+(deploy app)
+
+After the app is deployed run the following command to deploy the APIM artifacts:
+    
+```azurecli
+
+az deployment group create --resource-group rg-ais-samples3 --template-file ./apim/apim.bicep --parameters apimInstanceName='ais-sample-apim-h526c7usqwoxa' logicAppName='ais-sample-logicapp-h526c7usqwoxa'
+
+```
+
 This will create the following resources which are used by the sample scenarios. 
 
 ![A diagram showing the Azure resources used in the solution](diagrams/ais-sample.drawio.svg)

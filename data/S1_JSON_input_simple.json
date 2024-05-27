@@ -127,12 +127,10 @@
                 "PerPackageQuantity": "000000006"
               },
               "Extension": {
-                "Number": [
-                  {
-                    "@typeCode": "LineNumberID",
-                    "$": "000020"
-                  }
-                ]
+                "Number": {
+                  "@typeCode": "LineNumberID",
+                  "$": "000020"
+                }
               }
             },
             "Quantity": {
@@ -144,12 +142,10 @@
               "$": "15.000"
             },
             "Extension": {
-              "Code": [
-                {
-                  "@typeCode": "PartialControl",
-                  "$": "B"
-                }
-              ]
+              "Code": {
+                "@typeCode": "PartialControl",
+                "$": "B"
+              }
             }
           },
           {
@@ -160,12 +156,10 @@
                 "PerPackageQuantity": "000000006"
               },
               "Extension": {
-                "Number": [
-                  {
-                    "@typeCode": "LineNumberID",
-                    "$": "000030"
-                  }
-                ]
+                "Number": {
+                  "@typeCode": "LineNumberID",
+                  "$": "000030"
+                }
               }
             },
             "Quantity": {
@@ -191,12 +185,10 @@
                 "PerPackageQuantity": "000000006"
               },
               "Extension": {
-                "Number": [
-                  {
-                    "@typeCode": "LineNumberID",
-                    "$": "000580"
-                  }
-                ]
+                "Number": {
+                  "@typeCode": "LineNumberID",
+                  "$": "000580"
+                }
               }
             },
             "Quantity": {
@@ -208,12 +200,12 @@
               "$": "84.000"
             },
             "Extension": {
-              "Code": [
+              "Code": 
                 {
                   "@typeCode": "PartialControl",
                   "$": "B"
                 }
-              ]
+             
             }
           }
         ]

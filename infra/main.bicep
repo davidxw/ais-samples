@@ -64,6 +64,9 @@ resource apiManagementService 'Microsoft.ApiManagement/service@2023-05-01-previe
   }
 }
 
+output createdLogicAppName string = logicAppTokenName
+output createdApiManagementServiceName string = apiManagementServiceTokenName
+
 //
 // Blob Storage
 //
