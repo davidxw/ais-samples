@@ -12,6 +12,7 @@
     "omnisharp.dotNetCliPaths": [
       "C:\\Users\\dwatson\\.azurelogicapps\\dependencies\\DotNetSDK"
     ],
-    "debug.internalConsoleOptions": "neverOpen"
+    "debug.internalConsoleOptions": "neverOpen",
+    "azurite.location": "C:\\Users\\dwatson\\.azurelogicapps\\.azurite"
   }
 }

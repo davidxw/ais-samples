@@ -31,8 +31,8 @@
                     "parameters": {
                         "databaseName": "ais-samples-db",
                         "collectionName": "Employees",
-                        "leaseCollectionName": "leases",
-                        "createLeaseCollectionIfNotExists": true
+                        "leaseCollectionName": "logic_app_trigger_leases",
+                        "createLeaseCollectionIfNotExists": false
                     },
                     "serviceProviderConfiguration": {
                         "connectionName": "cosmosDb",

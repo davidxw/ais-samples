@@ -45,6 +45,7 @@ var listBlobContainers = [ 's1-sub1-final', 's3-received', 's3-final' ]
 var listSubscriptionNames = [ 's1-sub1', 's1-sub2', 's1-sub3' ]
 
 var cosmosDatabaseName = 'ais-samples-db'
+var cosmosLogicAppTriggerLeasesContainerName = 'logic_app_trigger_leases'
 var cosmosS1Sub2ContainerName = 's1-sub2-final'
 var cosmosS2ContainerName = 'Employees'
 
@@ -305,6 +306,22 @@ resource database 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases@2022-05-15
   }
 }
 
+resource leasesContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2022-05-15' = {
+  name: cosmosLogicAppTriggerLeasesContainerName
+  parent: database
+  properties: {
+    resource: {
+      id: cosmosLogicAppTriggerLeasesContainerName
+      partitionKey: {
+        paths: [
+          '/id'
+        ]
+        kind: 'Hash'
+      }
+    }
+  }
+}
+
 resource s1sub2container 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2022-05-15' = {
   name: cosmosS1Sub2ContainerName
   parent: database
@@ -336,3 +353,4 @@ resource s2container 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/contain
     }
   }
 }
+
