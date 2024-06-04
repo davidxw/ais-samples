@@ -1,0 +1,13 @@
+$version: 1
+$input: JSON
+$output: XML
+$sourceSchema: S2_JSON_input_SCHEMA.json
+$targetSchema: S2_XML_output_SCHEMA.xsd
+$targetNamespaces:
+  xs: http://www.w3.org/2001/XMLSchema
+employee:
+  $@id: /root/id
+  name: /root/name
+  position: /root/position
+  joinyear: /root/joinyear
+  salary: /root/salary
