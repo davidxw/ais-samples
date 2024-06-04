@@ -412,3 +412,5 @@ __azurite_db*__.json
 workflow-designtime/
 .vscode/
 data/test.http
+logicapp-workspace/ais-sample-logicapp/logicAppDeploy.zip
+logicapp-workspace/ais-sample-logicapp/logicAppDeploy

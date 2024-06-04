@@ -19,6 +19,9 @@ param applicationInsightsName string
 @description('The name of the Cosmos DB account')
 param cosmosDBAccountName string
 
+@description('The name of the Key Vault name')
+param keyVaultName string
+
 @description('The email address of the owner of the service')
 @minLength(1)
 param publisherEmail string = 'test@test.com'
@@ -38,6 +41,7 @@ var serviceBusNamespaceTokenName = toLower('${serviceBusNamespaceName}-${resourc
 var logAnalyticsWorkspaceTokenName = toLower('${logAnalyticsWorkspaceName}-${resourceToken}')
 var cosmosDBAccountTokenName = toLower('${cosmosDBAccountName}-${resourceToken}')
 var applicationInsightsTokenName = toLower('${applicationInsightsName}-${resourceToken}')
+var keyVaultNameTokenName = toLower('${keyVaultName}-${resourceToken}')
 
 var listQueues = [ 's1-received', 's1-sub1-output', 's2-received', 's3-received' ]
 var s1topicName = 's1-processed'
@@ -112,6 +116,70 @@ resource storageAccountRbac 'Microsoft.Authorization/roleAssignments@2022-04-01'
 }]
 
 //
+// A key vault to store the connection strings. The service bus and blob storage connections used by the logic app use managed
+// identities for access so connection strings are not required.  The Cosmos DB connection requires a connection string however,
+// as do the blob and app insights connections for the the logic app runtime.
+//
+
+// secret reader permissions for the logic app. Ideally you would scope this to the specific secrets that the logic app needs to read.
+var keyVaultSecretsReaderRole = subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '4633458b-17de-408a-b874-0445c86b69e6')
+
+resource kvFunctionAppPermissions 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = {
+  name: guid(kv.id, logicApp.name, keyVaultSecretsReaderRole)
+  scope: kv
+  properties: {
+    principalId: logicApp.identity.principalId
+    principalType: 'ServicePrincipal'
+    roleDefinitionId: keyVaultSecretsReaderRole
+  }
+}
+
+resource kv 'Microsoft.KeyVault/vaults@2021-06-01-preview' = {
+  name: keyVaultNameTokenName
+  location: location
+  properties: {
+    sku: {
+      family: 'A'
+      name: 'standard'
+    }
+    tenantId: subscription().tenantId
+    enableRbacAuthorization: true
+    enabledForDeployment: false
+    enabledForDiskEncryption: true
+    enabledForTemplateDeployment: false
+  }
+}
+
+// secrets:
+//  CosmosDB connection string
+//  Blob storage connection string
+//  Application Insights connection string
+
+resource CONNECTION_STRING_COSMOSDB 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
+  name: 'CONNECTION-STRING-COSMOSDB'
+  parent: kv
+  properties: {
+    value: cosmosDbAccount.listConnectionStrings().connectionStrings[0].connectionString
+  }
+}
+
+resource CONNECTION_STRING_BLOB_STORAGE 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
+  name: 'CONNECTION-STRING-BLOB-STORAGE'
+  parent: kv
+  properties: {
+    value: 'DefaultEndpointsProtocol=https;AccountName=${blobStorageAccount.name};AccountKey=${listKeys(blobStorageAccount.id, '2019-06-01').keys[0].value};EndpointSuffix=core.windows.net'
+  }
+}
+
+resource CONNECTION_STRING_APP_INSIGHTS 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
+  name: 'CONNECTION-STRING-APP-INSIGHTS'
+  parent: kv
+  properties: {
+    value: applicationInsights.properties.ConnectionString
+  }
+}
+
+//
 // Logic App Standard
 //
 
@@ -146,16 +214,16 @@ resource logicApp 'Microsoft.Web/sites@2022-09-01' = {
       FUNCTIONS_EXTENSION_VERSION: '~4'
       FUNCTIONS_WORKER_RUNTIME: 'node'
       WEBSITE_NODE_DEFAULT_VERSION: '~18'
-      AzureWebJobsStorage: 'DefaultEndpointsProtocol=https;AccountName=${blobStorageAccount.name};AccountKey=${listKeys(blobStorageAccount.id, '2019-06-01').keys[0].value};EndpointSuffix=core.windows.net'
-      WEBSITE_CONTENTAZUREFILECONNECTIONSTRING: 'DefaultEndpointsProtocol=https;AccountName=${blobStorageAccount.name};AccountKey=${listKeys(blobStorageAccount.id, '2019-06-01').keys[0].value};EndpointSuffix=core.windows.net'
+      AzureWebJobsStorage: '@Microsoft.KeyVault(VaultName=${kv.name};SecretName=${CONNECTION_STRING_BLOB_STORAGE.name})'
+      WEBSITE_CONTENTAZUREFILECONNECTIONSTRING: '@Microsoft.KeyVault(VaultName=${kv.name};SecretName=${CONNECTION_STRING_BLOB_STORAGE.name})'
       WEBSITE_CONTENTSHARE: blobStorageAccount.name
       AzureFunctionsJobHost__extensionBundle__id: 'Microsoft.Azure.Functions.ExtensionBundle.Workflows'
       AzureFunctionsJobHost__extensionBundle__version: '${'[1.*,'}${' 2.0.0)'}'
       APP_KIND: 'workflowApp'
       serviceBus_fullyQualifiedNamespace: '${serviceBusNamespace.name}.servicebus.windows.net'
-      AzureCosmosDB_connectionString: cosmosDbAccount.listConnectionStrings().connectionStrings[0].connectionString
+      AzureCosmosDB_connectionString: '@Microsoft.KeyVault(VaultName=${kv.name};SecretName=${CONNECTION_STRING_COSMOSDB.name})'
       AzureBlob_blobStorageEndpoint: blobStorageAccount.properties.primaryEndpoints.blob
-      APPLICATIONINSIGHTS_CONNECTION_STRING: applicationInsights.properties.ConnectionString
+      APPLICATIONINSIGHTS_CONNECTION_STRING: '@Microsoft.KeyVault(VaultName=${kv.name};SecretName=${CONNECTION_STRING_APP_INSIGHTS.name})'
       WORKFLOWS_RESOURCE_GROUP_NAME: resourceGroup().name
       WORKFLOWS_SUBSCRIPTION_ID: subscription().subscriptionId
       WORKFLOWS_LOCATION_NAME: location

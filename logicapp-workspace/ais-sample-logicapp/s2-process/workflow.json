@@ -1,26 +1,49 @@
 {
-  "definition": {
-      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
-      "actions": {},
-      "contentVersion": "1.0.0.0",
-      "outputs": {},
-      "triggers": {
-          "When_messages_are_available_in_a_queue": {
-              "type": "ServiceProvider",
-              "inputs": {
-                  "parameters": {
-                      "queueName": "s2-received",
-                      "isSessionsEnabled": false
-                  },
-                  "serviceProviderConfiguration": {
-                      "connectionName": "serviceBus",
-                      "operationId": "receiveQueueMessages",
-                      "serviceProviderId": "/serviceProviders/serviceBus"
-                  }
-              },
-              "splitOn": "@triggerOutputs()?['body']"
-          }
-      }
-  },
-  "kind": "Stateful"
+    "definition": {
+        "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+        "actions": {
+            "Transform_using_Data_Mapper_XSLT": {
+                "type": "Xslt",
+                "kind": "DataMapper",
+                "inputs": {
+                    "content": "@triggerBody()?['contentData']",
+                    "map": {
+                        "source": "LogicApp",
+                        "name": "s2-input-to-output.xslt"
+                    }
+                },
+                "runAfter": {}
+            },
+            "Scope": {
+                "type": "Scope",
+                "description": "Remove this scope action and add an action to create a file in Sharepoint",
+                "actions": {},
+                "runAfter": {
+                    "Transform_using_Data_Mapper_XSLT": [
+                        "SUCCEEDED"
+                    ]
+                }
+            }
+        },
+        "contentVersion": "1.0.0.0",
+        "outputs": {},
+        "triggers": {
+            "When_messages_are_available_in_a_queue": {
+                "type": "ServiceProvider",
+                "inputs": {
+                    "parameters": {
+                        "queueName": "s2-received",
+                        "isSessionsEnabled": false
+                    },
+                    "serviceProviderConfiguration": {
+                        "connectionName": "serviceBus",
+                        "operationId": "receiveQueueMessages",
+                        "serviceProviderId": "/serviceProviders/serviceBus"
+                    }
+                },
+                "splitOn": "@triggerOutputs()?['body']"
+            }
+        }
+    },
+    "kind": "Stateful"
 }

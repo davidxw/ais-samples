@@ -188,7 +188,7 @@
                             "importance": "Any",
                             "fetchOnlyWithAttachment": true,
                             "includeAttachments": true,
-                            "subjectFilter": "#toll",
+                            "subjectFilter": "#ais-sample",
                             "folderPath": "Inbox"
                         }
                     },
