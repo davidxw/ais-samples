@@ -120,6 +120,7 @@ To run this scenario create a document in the `Employees` container in the `ais-
     "salary": 7000
 }
 ```
+Note that in this scenario the receive workflow (s2-receive) does schema validation on the incoming message. If the message does not match the schema then the workflow will fail. You can test this by sending a message that does not match the schema - e.g. by changing the `joinyear` field to a string.
 
 ## Scenario 3
 

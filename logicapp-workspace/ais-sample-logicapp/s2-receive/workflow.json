@@ -18,6 +18,45 @@
                         "serviceProviderId": "/serviceProviders/serviceBus"
                     }
                 },
+                "runAfter": {
+                    "Parse_JSON_-_validate_schema": [
+                        "SUCCEEDED"
+                    ]
+                }
+            },
+            "Parse_JSON_-_validate_schema": {
+                "type": "ParseJson",
+                "inputs": {
+                    "content": "@triggerBody()?['content']",
+                    "schema": {
+                        "$schema": "http://json-schema.org/draft-04/schema#",
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "type": "string"
+                            },
+                            "name": {
+                                "type": "string"
+                            },
+                            "position": {
+                                "type": "string"
+                            },
+                            "joinyear": {
+                                "type": "integer"
+                            },
+                            "salary": {
+                                "type": "integer"
+                            }
+                        },
+                        "required": [
+                            "id",
+                            "name",
+                            "position",
+                            "joinyear",
+                            "salary"
+                        ]
+                    }
+                },
                 "runAfter": {}
             }
         },
