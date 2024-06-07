@@ -19,7 +19,7 @@
                 "type": "ServiceProvider",
                 "inputs": {
                     "parameters": {
-                        "entityName": "s1-sub1-output",
+                        "entityName": "s1-sub3-output",
                         "message": {
                             "contentData": "@variables('messageBody')",
                             "contentType": "application/xml"

@@ -43,7 +43,7 @@ var cosmosDBAccountTokenName = toLower('${cosmosDBAccountName}-${resourceToken}'
 var applicationInsightsTokenName = toLower('${applicationInsightsName}-${resourceToken}')
 var keyVaultNameTokenName = toLower('${keyVaultName}-${resourceToken}')
 
-var listQueues = [ 's1-received', 's1-sub1-output', 's2-received', 's3-received' ]
+var listQueues = [ 's1-received', 's1-sub3-output', 's2-received', 's3-received' ]
 var s1topicName = 's1-processed'
 var listBlobContainers = [ 's1-sub1-final', 's3-received', 's3-final' ]
 var listSubscriptionNames = [ 's1-sub1', 's1-sub2', 's1-sub3' ]
