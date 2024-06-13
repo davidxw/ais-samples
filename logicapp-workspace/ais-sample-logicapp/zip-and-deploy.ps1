@@ -37,6 +37,17 @@ Copy-Item .\connections.json .\logicAppDeploy -Force
 Copy-Item .\host.json .\logicAppDeploy -Force
 Copy-Item .\parameters.json .\logicAppDeploy -Force
 
+# update the office365 api connection with the require values for running in Azure
+# https://learn.microsoft.com/en-us/azure/logic-apps/set-up-devops-deployment-single-tenant-azure-logic-apps?tabs=github#update-authentication-type
+
+$office365AuthObject = [PSCustomObject]@{
+    type     = 'ManagedServiceIdentity'
+}
+
+$connections = Get-Content .\logicAppDeploy\connections.json | ConvertFrom-Json
+$connections.managedApiConnections.office365.authentication = $office365AuthObject
+$connections | ConvertTo-Json -depth 32 | % { [System.Text.RegularExpressions.Regex]::Unescape($_) } | Out-File .\logicAppDeploy\connections.json
+
 Write-Host "## Zipping deployment folder"
 
 Compress-Archive -Path .\logicAppDeploy\* -DestinationPath .\logicAppDeploy.zip -Force
