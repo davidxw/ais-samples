@@ -112,7 +112,7 @@ az deployment group create --resource-group rg-ais-samples --template-file ./api
 
 To run this scenario POST the sample document `data/S1_JSON_input_simple.json` to the APIM API endpoint using an [APIM subscription key](https://learn.microsoft.com/en-us/azure/api-management/api-management-subscriptions).  You can use the following curl command to do this:
 
-```ps
+```
  Invoke-WebRequest -Uri https://<APIM NAME>.azure-api.net/sample-api/s1-receive -Method POST -UseBasicParsing -ContentType application/json -Headers @{"Ocp-Apim-Subscription-Key" = "<APIM KEY>"} -InFile .\data\S1_JSON_input_simple.json
 ```
 
