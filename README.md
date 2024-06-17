@@ -82,11 +82,11 @@ There are two options to deploy the workflows:
     1. From PowerShell navigate to the `logicapp-workspace\ais-sample-logicapp` directory
     2. Run the `zip-and-deploy.ps1` using the following arguments:
   
-        ``` ps 
+        ``` 
         .\zip-and-deploy.ps1 <LOGIC APP NAME> <RESOURCE GROUP NAME>
         ```
         e.g
-        ``` ps 
+        ```
         .\zip-and-deploy.ps1 ais-sample-logicapp-x54elz3alby4a rg-ais-samples
         ```
 2. Deploy the workflows from Visual Studio Code. The document [Create a Standard logic app workflow in single-tenant Azure Logic Apps using Visual Studio Code](https://learn.microsoft.com/en-us/azure/logic-apps/create-single-tenant-workflows-visual-studio-code) contains detailed instruction on how to create and deploy workfllow from Visual Studio Code, but in the case where we already have a workflow you can use the following steps:
