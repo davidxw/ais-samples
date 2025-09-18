@@ -43,10 +43,10 @@ var cosmosDBAccountTokenName = toLower('${cosmosDBAccountName}-${resourceToken}'
 var applicationInsightsTokenName = toLower('${applicationInsightsName}-${resourceToken}')
 var keyVaultNameTokenName = toLower('${keyVaultName}-${resourceToken}')
 
-var listQueues = [ 's1-received', 's1-sub3-output', 's2-received', 's3-received' ]
+var listQueues = ['s1-received', 's1-sub3-output', 's2-received', 's3-received']
 var s1topicName = 's1-processed'
-var listBlobContainers = [ 's1-sub1-final', 's3-received', 's3-final' ]
-var listSubscriptionNames = [ 's1-sub1', 's1-sub2', 's1-sub3' ]
+var listBlobContainers = ['s1-sub1-final', 's3-received', 's3-final']
+var listSubscriptionNames = ['s1-sub1', 's1-sub2', 's1-sub3']
 
 var cosmosDatabaseName = 'ais-samples-db'
 var cosmosLogicAppTriggerLeasesContainerName = 'logic_app_trigger_leases'
@@ -93,27 +93,30 @@ resource blobServices 'Microsoft.Storage/storageAccounts/blobServices@2023-01-01
   name: 'default'
 }
 
-resource symbolicname 'Microsoft.Storage/storageAccounts/blobServices/containers@2023-01-01' = [for name in listBlobContainers: {
-  name: name
-  parent: blobServices
-  properties: {
+resource symbolicname 'Microsoft.Storage/storageAccounts/blobServices/containers@2023-01-01' = [
+  for name in listBlobContainers: {
+    name: name
+    parent: blobServices
+    properties: {}
   }
-}]
+]
 
 // roles to allow the logic app to send and receive messages from the service bus
 
 var storageBlobRoleIds = [
-  'ba92f5b4-2d11-453d-a403-e96b0029c9fe' // blob data contributor
+  'b7e6dc6d-f1e8-4753-8033-0f276bb0955b' // storage blob data owner
 ]
-resource storageAccountRbac 'Microsoft.Authorization/roleAssignments@2022-04-01' = [for roleId in storageBlobRoleIds: {
-  scope: blobStorageAccount
-  name: guid(logicApp.id, roleId)
-  properties: {
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', roleId)
-    principalType: 'ServicePrincipal'
-    principalId: logicApp.identity.principalId
+resource storageAccountRbac 'Microsoft.Authorization/roleAssignments@2022-04-01' = [
+  for roleId in storageBlobRoleIds: {
+    scope: blobStorageAccount
+    name: guid(logicApp.id, roleId)
+    properties: {
+      roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', roleId)
+      principalType: 'ServicePrincipal'
+      principalId: logicApp.identity.principalId
+    }
   }
-}]
+]
 
 //
 // A key vault to store the connection strings. The service bus and blob storage connections used by the logic app use managed
@@ -122,7 +125,10 @@ resource storageAccountRbac 'Microsoft.Authorization/roleAssignments@2022-04-01'
 //
 
 // secret reader permissions for the logic app. Ideally you would scope this to the specific secrets that the logic app needs to read.
-var keyVaultSecretsReaderRole = subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '4633458b-17de-408a-b874-0445c86b69e6')
+var keyVaultSecretsReaderRole = subscriptionResourceId(
+  'Microsoft.Authorization/roleDefinitions',
+  '4633458b-17de-408a-b874-0445c86b69e6'
+)
 
 resource kvFunctionAppPermissions 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = {
   name: guid(kv.id, logicApp.name, keyVaultSecretsReaderRole)
@@ -208,29 +214,30 @@ resource logicApp 'Microsoft.Web/sites@2022-09-01' = {
   identity: {
     type: 'SystemAssigned'
   }
-  resource config 'config@2022-09-01' = {
-    name: 'appsettings'
-    properties: {
-      FUNCTIONS_EXTENSION_VERSION: '~4'
-      FUNCTIONS_WORKER_RUNTIME: 'node'
-      WEBSITE_NODE_DEFAULT_VERSION: '~18'
-      AzureWebJobsStorage: '@Microsoft.KeyVault(VaultName=${kv.name};SecretName=${CONNECTION_STRING_BLOB_STORAGE.name})'
-      WEBSITE_CONTENTAZUREFILECONNECTIONSTRING: '@Microsoft.KeyVault(VaultName=${kv.name};SecretName=${CONNECTION_STRING_BLOB_STORAGE.name})'
-      WEBSITE_CONTENTSHARE: blobStorageAccount.name
-      AzureFunctionsJobHost__extensionBundle__id: 'Microsoft.Azure.Functions.ExtensionBundle.Workflows'
-      AzureFunctionsJobHost__extensionBundle__version: '${'[1.*,'}${' 2.0.0)'}'
-      APP_KIND: 'workflowApp'
-      serviceBus_fullyQualifiedNamespace: '${serviceBusNamespace.name}.servicebus.windows.net'
-      AzureCosmosDB_connectionString: '@Microsoft.KeyVault(VaultName=${kv.name};SecretName=${CONNECTION_STRING_COSMOSDB.name})'
-      AzureBlob_blobStorageEndpoint: blobStorageAccount.properties.primaryEndpoints.blob
-      APPLICATIONINSIGHTS_CONNECTION_STRING: '@Microsoft.KeyVault(VaultName=${kv.name};SecretName=${CONNECTION_STRING_APP_INSIGHTS.name})'
-      WORKFLOWS_RESOURCE_GROUP_NAME: resourceGroup().name
-      WORKFLOWS_SUBSCRIPTION_ID: subscription().subscriptionId
-      WORKFLOWS_LOCATION_NAME: location
-      WORKFLOWS_TENANT_ID: subscription().tenantId
-      WORKFLOWS_MANAGEMENT_BASE_URI: 'https://management.azure.com/'
-      office365_ConnectionRuntimeUrl: office365APIConnection.properties.connectionRuntimeUrl
-    }
+}
+
+resource config 'Microsoft.Web/sites/config@2024-11-01' = {
+  name: 'appsettings'
+  parent: logicApp
+  properties: {
+    FUNCTIONS_EXTENSION_VERSION: '~4'
+    FUNCTIONS_WORKER_RUNTIME: 'node'
+    WEBSITE_NODE_DEFAULT_VERSION: '~18'
+    // Use only the account name as the logic app runtime will use managed identity to access the storage account
+    AzureWebJobsStorage__accountName: blobStorageAccount.name
+    AzureFunctionsJobHost__extensionBundle__id: 'Microsoft.Azure.Functions.ExtensionBundle.Workflows'
+    AzureFunctionsJobHost__extensionBundle__version: '${'[1.*,'}${' 2.0.0)'}'
+    APP_KIND: 'workflowApp'
+    serviceBus_fullyQualifiedNamespace: '${serviceBusNamespace.name}.servicebus.windows.net'
+    AzureCosmosDB_connectionString: '@Microsoft.KeyVault(VaultName=${kv.name};SecretName=${CONNECTION_STRING_COSMOSDB.name})'
+    AzureBlob_blobStorageEndpoint: blobStorageAccount.properties.primaryEndpoints.blob
+    APPLICATIONINSIGHTS_CONNECTION_STRING: '@Microsoft.KeyVault(VaultName=${kv.name};SecretName=${CONNECTION_STRING_APP_INSIGHTS.name})'
+    WORKFLOWS_RESOURCE_GROUP_NAME: resourceGroup().name
+    WORKFLOWS_SUBSCRIPTION_ID: subscription().subscriptionId
+    WORKFLOWS_LOCATION_NAME: location
+    WORKFLOWS_TENANT_ID: subscription().tenantId
+    WORKFLOWS_MANAGEMENT_BASE_URI: 'https://management.azure.com/'
+    office365_ConnectionRuntimeUrl: office365APIConnection.properties.connectionRuntimeUrl
   }
 }
 
@@ -238,6 +245,22 @@ resource logicApp 'Microsoft.Web/sites@2022-09-01' = {
 // API Connections for Logic App
 // These are required for managed connectors. After deployed you will need to go the portal, select the API Connector, and authorize the connection.
 //
+
+resource dynamicsSpConnection 'Microsoft.Web/connections@2018-07-01-preview' = {
+  name: 'dynamicsSpConnection'
+  location: location
+  kind: 'V2'
+  properties: {
+    api: {
+      id: subscriptionResourceId('Microsoft.Web/locations/managedApis', location, 'dynamicsax')
+    }
+    parameterValues: {
+      'token:clientId': logicApp.identity.principalId
+      'token:resourceUri': 'https://api.businesscentral.dynamics.com/'
+    }
+    displayName: 'dynamicsSpConnection'
+  }
+}
 
 resource office365APIConnection 'Microsoft.Web/connections@2018-07-01-preview' = {
   name: 'office365'
@@ -266,7 +289,6 @@ resource office365APIConnectionAccessPolicy 'Microsoft.Web/connections/accessPol
   }
 }
 
-
 //
 // Service Bus
 //
@@ -279,28 +301,27 @@ resource serviceBusNamespace 'Microsoft.ServiceBus/namespaces@2022-01-01-preview
   properties: {}
 }
 
-resource serviceBusQueues 'Microsoft.ServiceBus/namespaces/queues@2022-01-01-preview' = [for name in listQueues: {
-  name: name
-  parent: serviceBusNamespace
-  properties: {
-
+resource serviceBusQueues 'Microsoft.ServiceBus/namespaces/queues@2022-01-01-preview' = [
+  for name in listQueues: {
+    name: name
+    parent: serviceBusNamespace
+    properties: {}
   }
-}]
+]
 
 resource serviceBusTopic 'Microsoft.ServiceBus/namespaces/topics@2022-01-01-preview' = {
   name: s1topicName
   parent: serviceBusNamespace
-  properties: {
-
-  }
+  properties: {}
 }
 
-resource serviceBusTopicSubscriptions 'Microsoft.ServiceBus/namespaces/topics/subscriptions@2022-01-01-preview' = [for name in listSubscriptionNames: {
-  name: name
-  parent: serviceBusTopic
-  properties: {
+resource serviceBusTopicSubscriptions 'Microsoft.ServiceBus/namespaces/topics/subscriptions@2022-01-01-preview' = [
+  for name in listSubscriptionNames: {
+    name: name
+    parent: serviceBusTopic
+    properties: {}
   }
-}]
+]
 
 // roles to allow the logic app to send and receive messages from the service bus
 
@@ -308,15 +329,17 @@ var serviceBusRoleIds = [
   '4f6d3b9b-027b-4f4c-9142-0e5a2a2247e0' // service bus data receiver
   '69a216fc-b8fb-44d8-bc22-1f3c2cd27a39' // service bus data sender
 ]
-resource serviceBusRbac 'Microsoft.Authorization/roleAssignments@2022-04-01' = [for roleId in serviceBusRoleIds: {
-  scope: serviceBusNamespace
-  name: guid(logicApp.id, roleId)
-  properties: {
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', roleId)
-    principalType: 'ServicePrincipal'
-    principalId: logicApp.identity.principalId
+resource serviceBusRbac 'Microsoft.Authorization/roleAssignments@2022-04-01' = [
+  for roleId in serviceBusRoleIds: {
+    scope: serviceBusNamespace
+    name: guid(logicApp.id, roleId)
+    properties: {
+      roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', roleId)
+      principalType: 'ServicePrincipal'
+      principalId: logicApp.identity.principalId
+    }
   }
-}]
+]
 
 //
 // logging and monitoring
@@ -421,4 +444,3 @@ resource s2container 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/contain
     }
   }
 }
-

@@ -60,7 +60,7 @@ This will create the following resources which are used by the sample scenarios.
 
 ### Notes
 
-* In this deployment all services are deployed with public endpoints. This is for demonstration purposes only and should not be used in a production environment. For a more secure version of this infrastructure see the `infra-secure` folder.   
+* In this deployment all services are deployed with public endpoints. This is for demonstration purposes only and should not be used in a production environment. 
 * The template generates a random suffix for the resources. This is to ensure that the name of the resources are unique accross Azure - for production deployments you should use a naming convention that is meaningful to your organisation.
 * In this sample authentication between Azure services is implemented via managed identity were possible. The template configures Logic Apps with a system generated identiy and grants the required permissions to the other services. For resources where managed identity is not supported bt the Logic App connections (e.g. Azure Cosmos DB) the templates create KeyVault secrets for connection strings and reference these secrets from the Logic App configuration.
 * All logic app workflows are deployed to the same logic app instance. Depending on your own requirements you may want to deploy these to separate instances.
@@ -103,7 +103,6 @@ The APIM API definitions and policies required for Scenario 1 are included in th
 ```azurecli
 az deployment group create --resource-group rg-ais-samples --template-file ./apim/apim.bicep --parameters apimInstanceName='<APIM INSTANCE NAME>' logicAppName='<LOGIC APP NAME>'
 ```
-
 # Running the Scenarios
 
 ## Scenario 1
