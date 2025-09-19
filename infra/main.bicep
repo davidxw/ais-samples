@@ -37,6 +37,7 @@ var apiManagementServiceTokenName = toLower('${apiManagementServiceName}-${resou
 var blobStorageAccountTokenName = toLower('${blobStorageAccountName}${resourceToken}')
 var logicAppPlanTokenName = toLower('${logicAppName}-plan-${resourceToken}')
 var logicAppTokenName = toLower('${logicAppName}-${resourceToken}')
+var logicAppIdentityName = toLower('${logicAppName}-identity-${resourceToken}')
 var serviceBusNamespaceTokenName = toLower('${serviceBusNamespaceName}-${resourceToken}')
 var logAnalyticsWorkspaceTokenName = toLower('${logAnalyticsWorkspaceName}-${resourceToken}')
 var cosmosDBAccountTokenName = toLower('${cosmosDBAccountName}-${resourceToken}')
@@ -53,12 +54,27 @@ var cosmosLogicAppTriggerLeasesContainerName = 'logic_app_trigger_leases'
 var cosmosS1Sub2ContainerName = 's1-sub2-final'
 var cosmosS2ContainerName = 'Employees'
 
+var tags = {
+  SecurityControl: 'Ignore'
+  CostControl: 'Ignore'
+}
+
+// managed identity to assign to the logic app for accessing resources. Required to access workflow storage via managed identity and not keys
+// https://review.learn.microsoft.com/en-us/azure/logic-apps/create-single-tenant-workflows-azure-portal?branch=main&branchFallbackFrom=pr-en-us-279972#set-up-managed-identity-access-to-your-storage-account
+// Note that the user assigned managed is only used to access the internal logic app workflow storage account. The logic app itself uses a system assigned managed identity for other resource access.
+resource logicAppIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2018-11-30' = {
+  name: logicAppIdentityName
+  location: location
+  tags: tags
+}
+
 //
 // API Management
 //
 resource apiManagementService 'Microsoft.ApiManagement/service@2023-05-01-preview' = {
   name: apiManagementServiceTokenName
   location: location
+  tags: tags
   sku: {
     name: 'Developer'
     capacity: 1
@@ -78,6 +94,7 @@ output createdApiManagementServiceName string = apiManagementServiceTokenName
 resource blobStorageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
   name: blobStorageAccountTokenName
   location: location
+  tags: tags
   sku: {
     name: 'Standard_LRS'
   }
@@ -101,15 +118,37 @@ resource symbolicname 'Microsoft.Storage/storageAccounts/blobServices/containers
   }
 ]
 
-// roles to allow the logic app to send and receive messages from the service bus
+// roles to allow the logic app to use the user assigned managed identity to access the blob storage account
+// https://review.learn.microsoft.com/en-us/azure/logic-apps/create-single-tenant-workflows-azure-portal?branch=main&branchFallbackFrom=pr-en-us-279972#set-up-managed-identity-access-to-your-storage-account
 
-var storageBlobRoleIds = [
+var storageBlobRoleIdsWorkflowStorage = [
+  'b7e6dc6d-f1e8-4753-8033-0f276bb0955b' // storage blob data owner
+  '17d1049b-9a84-46fb-8f53-869881c3d3ab' // storage contributor
+  '974c5e8b-45b9-4653-ba55-5f855dd0fb88' // storage queue data contributor
+  '0a9a7e1f-b9d0-4cc4-a60d-0319b160aaa3' // storage table data contributor
+
+]
+resource storageAccountRbacWorkflowStorage 'Microsoft.Authorization/roleAssignments@2022-04-01' = [
+  for roleId in storageBlobRoleIdsWorkflowStorage: {
+    scope: blobStorageAccount
+    name: guid(logicApp.id, 'workflowStorage', roleId)
+    properties: {
+      roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', roleId)
+      principalType: 'ServicePrincipal'
+      principalId: logicAppIdentity.properties.principalId
+    }
+  }
+]
+
+// roles to allow the logic app blob connectors to read and write to blob storage
+var storageBlobRoleIdsLogicAppFlows = [
   'b7e6dc6d-f1e8-4753-8033-0f276bb0955b' // storage blob data owner
 ]
-resource storageAccountRbac 'Microsoft.Authorization/roleAssignments@2022-04-01' = [
-  for roleId in storageBlobRoleIds: {
+
+resource storageAccountRbacLogicAppFlows 'Microsoft.Authorization/roleAssignments@2022-04-01' = [
+  for roleId in storageBlobRoleIdsLogicAppFlows: {
     scope: blobStorageAccount
-    name: guid(logicApp.id, roleId)
+    name: guid(logicApp.id, 'flows', roleId)
     properties: {
       roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', roleId)
       principalType: 'ServicePrincipal'
@@ -117,6 +156,7 @@ resource storageAccountRbac 'Microsoft.Authorization/roleAssignments@2022-04-01'
     }
   }
 ]
+
 
 //
 // A key vault to store the connection strings. The service bus and blob storage connections used by the logic app use managed
@@ -143,6 +183,7 @@ resource kvFunctionAppPermissions 'Microsoft.Authorization/roleAssignments@2020-
 resource kv 'Microsoft.KeyVault/vaults@2021-06-01-preview' = {
   name: keyVaultNameTokenName
   location: location
+  tags: tags
   properties: {
     sku: {
       family: 'A'
@@ -192,6 +233,7 @@ resource CONNECTION_STRING_APP_INSIGHTS 'Microsoft.KeyVault/vaults/secrets@2023-
 resource logicAppPlan 'Microsoft.Web/serverfarms@2022-09-01' = {
   name: logicAppPlanTokenName
   location: location
+  tags: tags
   kind: 'elastic'
   sku: {
     name: 'WS1'
@@ -205,6 +247,7 @@ resource logicAppPlan 'Microsoft.Web/serverfarms@2022-09-01' = {
 resource logicApp 'Microsoft.Web/sites@2022-09-01' = {
   name: logicAppTokenName
   location: location
+  tags: tags
   kind: 'functionapp,workflowapp'
   properties: {
     serverFarmId: logicAppPlan.id
@@ -212,7 +255,10 @@ resource logicApp 'Microsoft.Web/sites@2022-09-01' = {
     httpsOnly: true
   }
   identity: {
-    type: 'SystemAssigned'
+    type: 'SystemAssigned, UserAssigned'
+    userAssignedIdentities: {
+      '${logicAppIdentity.id}': {}
+    }
   }
 }
 
@@ -222,9 +268,15 @@ resource config 'Microsoft.Web/sites/config@2024-11-01' = {
   properties: {
     FUNCTIONS_EXTENSION_VERSION: '~4'
     FUNCTIONS_WORKER_RUNTIME: 'node'
-    WEBSITE_NODE_DEFAULT_VERSION: '~18'
-    // Use only the account name as the logic app runtime will use managed identity to access the storage account
-    AzureWebJobsStorage__accountName: blobStorageAccount.name
+    WEBSITE_NODE_DEFAULT_VERSION: '20'
+
+    // required to access workflow storage via managed identity
+    AzureWebJobsStorage__managedIdentityResourceId: logicAppIdentity.id
+    AzureWebJobsStorage__credential: 'managedIdentity'
+    AzureWebJobsStorage__blobServiceUri: blobStorageAccount.properties.primaryEndpoints.blob
+    AzureWebJobsStorage__queueServiceUri: blobStorageAccount.properties.primaryEndpoints.queue
+    AzureWebJobsStorage__tableServiceUri: blobStorageAccount.properties.primaryEndpoints.table
+
     AzureFunctionsJobHost__extensionBundle__id: 'Microsoft.Azure.Functions.ExtensionBundle.Workflows'
     AzureFunctionsJobHost__extensionBundle__version: '${'[1.*,'}${' 2.0.0)'}'
     APP_KIND: 'workflowApp'
@@ -238,6 +290,7 @@ resource config 'Microsoft.Web/sites/config@2024-11-01' = {
     WORKFLOWS_TENANT_ID: subscription().tenantId
     WORKFLOWS_MANAGEMENT_BASE_URI: 'https://management.azure.com/'
     office365_ConnectionRuntimeUrl: office365APIConnection.properties.connectionRuntimeUrl
+    functionsRuntimeScaleMonitoringEnabled: 'true'
   }
 }
 
@@ -246,7 +299,7 @@ resource config 'Microsoft.Web/sites/config@2024-11-01' = {
 // These are required for managed connectors. After deployed you will need to go the portal, select the API Connector, and authorize the connection.
 //
 
-resource dynamicsSpConnection 'Microsoft.Web/connections@2018-07-01-preview' = {
+resource dynamicsSpConnection 'Microsoft.Web/connections@2016-06-01' = {
   name: 'dynamicsSpConnection'
   location: location
   kind: 'V2'
@@ -262,7 +315,7 @@ resource dynamicsSpConnection 'Microsoft.Web/connections@2018-07-01-preview' = {
   }
 }
 
-resource office365APIConnection 'Microsoft.Web/connections@2018-07-01-preview' = {
+resource office365APIConnection 'Microsoft.Web/connections@2016-06-01' = {
   name: 'office365'
   location: location
   kind: 'V2'
@@ -295,6 +348,7 @@ resource office365APIConnectionAccessPolicy 'Microsoft.Web/connections/accessPol
 resource serviceBusNamespace 'Microsoft.ServiceBus/namespaces@2022-01-01-preview' = {
   name: serviceBusNamespaceTokenName
   location: location
+  tags: tags
   sku: {
     name: 'Standard'
   }
@@ -348,11 +402,13 @@ resource serviceBusRbac 'Microsoft.Authorization/roleAssignments@2022-04-01' = [
 resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2021-12-01-preview' = {
   name: logAnalyticsWorkspaceTokenName
   location: location
+  tags: tags
 }
 
 resource applicationInsights 'Microsoft.Insights/components@2020-02-02' = {
   name: applicationInsightsTokenName
   location: location
+  tags: tags
   kind: 'web'
   properties: {
     Application_Type: 'web'
@@ -369,6 +425,7 @@ resource applicationInsights 'Microsoft.Insights/components@2020-02-02' = {
 resource cosmosDbAccount 'Microsoft.DocumentDB/databaseAccounts@2023-04-15' = {
   name: cosmosDBAccountTokenName
   location: location
+  tags: tags
   kind: 'GlobalDocumentDB'
   properties: {
     databaseAccountOfferType: 'Standard'
@@ -385,6 +442,7 @@ resource cosmosDbAccount 'Microsoft.DocumentDB/databaseAccounts@2023-04-15' = {
 resource database 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases@2022-05-15' = {
   name: cosmosDatabaseName
   parent: cosmosDbAccount
+  tags: tags
   properties: {
     resource: {
       id: cosmosDatabaseName
@@ -444,3 +502,7 @@ resource s2container 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/contain
     }
   }
 }
+
+output serviceBus_fullyQualifiedNamespace string = serviceBusNamespace.properties.serviceBusEndpoint
+output AzureCosmosDB_connectionString string = cosmosDbAccount.properties.connectionStrings[0]
+output AzureBlob_blobStorageEndpoint string = blobStorageAccount.properties.primaryEndpoints.blob

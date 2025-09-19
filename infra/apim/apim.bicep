@@ -37,6 +37,7 @@ var schema = loadTextContent('./../../logicapp-workspace/ais-sample-logicapp/Art
 resource api 'Microsoft.ApiManagement/service/apis@2021-01-01-preview' = {
   name: 'api-v1'
   parent: apimInstance
+  tags: tags
   properties: {
     displayName: 'Sample API'
     subscriptionRequired: true
@@ -50,6 +51,7 @@ resource api 'Microsoft.ApiManagement/service/apis@2021-01-01-preview' = {
 resource apiPolicy 'Microsoft.ApiManagement/service/apis/policies@2023-05-01-preview' = {
   name: 'policy'
   parent: api
+  tags: tags
   dependsOn: [
     logicAppBackend
   ]
@@ -64,6 +66,7 @@ resource apiPolicy 'Microsoft.ApiManagement/service/apis/policies@2023-05-01-pre
 resource operation 'Microsoft.ApiManagement/service/apis/operations@2021-01-01-preview' = {
   name: 's1-receive'
   parent: api
+  tags: tags
   properties: {
     displayName: workflowName
     method: 'POST'
@@ -78,6 +81,7 @@ resource operation 'Microsoft.ApiManagement/service/apis/operations@2021-01-01-p
   }
   resource policy 'policies@2021-01-01-preview' = {
     name: 'policy'
+    tags: tags
     dependsOn: [
       s1Schema
     ]
@@ -93,6 +97,7 @@ resource operation 'Microsoft.ApiManagement/service/apis/operations@2021-01-01-p
 resource logicAppBackend 'Microsoft.ApiManagement/service/backends@2023-05-01-preview' = {
   name: backend_id
   parent: apimInstance
+  tags: tags
   properties: {
     protocol: 'http'
     tls: {
@@ -108,10 +113,16 @@ resource logicAppBackend 'Microsoft.ApiManagement/service/backends@2023-05-01-pr
 resource s1Schema 'Microsoft.ApiManagement/service/schemas@2023-05-01-preview' = {
   name: schema_id
   parent: apimInstance
+  tags: tags
   properties: {
     schemaType: 'JSON'
     document: {
       value: schema
     }
   }
+}
+
+var tags = {
+  SecurityControl: 'Ignore'
+  CostControl: 'Ignore'
 }

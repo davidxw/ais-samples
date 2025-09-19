@@ -35,7 +35,7 @@ To fully deploy the sample scenarions in this repo the following steps are requi
 3. Application Deployment - Logic App Workflows
 4. Application Deployment - APIM Definitions
 
-## 1. Infrastructure Deployment
+## Infrastructure Deployment
 
 In order to implement the above scenarios a number of Azure AIS Services are required:
 
@@ -65,7 +65,7 @@ This will create the following resources which are used by the sample scenarios.
 * In this sample authentication between Azure services is implemented via managed identity were possible. The template configures Logic Apps with a system generated identiy and grants the required permissions to the other services. For resources where managed identity is not supported bt the Logic App connections (e.g. Azure Cosmos DB) the templates create KeyVault secrets for connection strings and reference these secrets from the Logic App configuration.
 * All logic app workflows are deployed to the same logic app instance. Depending on your own requirements you may want to deploy these to separate instances.
 
-### 2. Office 365 Connection
+### Office 365 Connection
 
 After the deployment is completed you will need to authorize the Office 365 connector used by Scenarion 3. From the Azure Portal navigate to the `rg-ais-samples` resource group, and click into the `office365` API Connection.  Click on the error notification and then click "Authorize".  You will need to sign in with your Office 365 account, and the Inbox associated with this account will be used by Scenario 3.
 
@@ -73,7 +73,7 @@ After the deployment is completed you will need to authorize the Office 365 conn
 
 With the infrastructure in place you can now deploy the Logic App Workflows and APIM configurations required to implement the sample scenarios.
 
-### 3. Logic App Workflows
+### Logic App Workflows
 
 There are two options to deploy the workflows:
 
@@ -96,13 +96,27 @@ There are two options to deploy the workflows:
             ![A screenshot of the Visual Studio Code workspace](images/workspace.png)
     3. Skip to the [Deploy to Azure](https://learn.microsoft.com/en-us/azure/logic-apps/create-single-tenant-workflows-visual-studio-code#deploy-to-azure) section to deploy the workflows to Azure.  When prompted for the name of the Logic App instance use the name of the Logic App instance that was deployed above.
 
-### 4. APIM Definitions
+### APIM Definitions
 
 The APIM API definitions and policies required for Scenario 1 are included in the `infra/apim` folder. The APIM configuration can be deployed using the following Azure CLI command - first get the names of the logic app and APIM instances that were deployed above, and update the appropriate parameters in the command below. Note that the APIs cannot be created until the Logic App workflows have been deployed as the HTTP trigger URL is required (and this contains a key that is generated when the workflow is deployed).
 
 ```azurecli
 az deployment group create --resource-group rg-ais-samples --template-file ./apim/apim.bicep --parameters apimInstanceName='<APIM INSTANCE NAME>' logicAppName='<LOGIC APP NAME>'
 ```
+
+## Local Development
+
+To run the workflows locally you will to carry out the following steps:
+1. Deploy the infrastructure as described in the "Infrastructure Deployment" section above. This is required as the workflows use a number of Azure services that need to be in place.
+2. Set up your Visual Studio Code environment as described in the "Deploy the workflows from Visual Studio Code" section above.
+3. Create configuration settings in local.settings.json for the connections used by the workflows. The output from the deployment of the main Azure resources will contain the keys and values that you need:
+
+    ```
+    serviceBus_fullyQualifiedNamespace 
+    AzureCosmosDB_connectionString string 
+    AzureBlob_blobStorageEndpoint string
+    ```
+
 # Running the Scenarios
 
 ## Scenario 1
